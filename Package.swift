@@ -19,7 +19,8 @@ let package = Package(
         .target(
             name: "SwiftUIPlus",
             dependencies: [
-            ]
+            ],
+            path: "Sources"
         ),
     ]
 )
