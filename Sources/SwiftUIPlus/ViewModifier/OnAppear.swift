@@ -24,12 +24,12 @@ public extension View {
     func onAppear(
         action: @escaping () -> Void,
         queue: @escaping () -> DispatchQueue = { .main },
-        delay: @escaping () -> Double = { 0 }
+        delay: Double = 0
     ) -> some View {
         self
             .onAppear(
                 perform: {
-                    queue().asyncAfter(deadline: .now() + delay()) {
+                    queue().asyncAfter(deadline: .now() + delay) {
                         action()
                     }
                 }

@@ -15,14 +15,14 @@ public struct AdaptiveStack<Content: View>: View {
     private let verticalAlignment: VerticalAlignment
     private let verticalSpacing: CGFloat?
     
-    // ⚠️
-    #warning("⚠️ add documentation")
-    public init(horizontalAlignment: HorizontalAlignment = .center,
-                horizontalSpacing: CGFloat? = nil,
-                verticalAlignment: VerticalAlignment = .center,
-                verticalSpacing: CGFloat? = nil,
-                condition: @escaping ConditionHandler,
-                @ViewBuilder content: () -> Content) {
+    public init(
+        horizontalAlignment: HorizontalAlignment = .center,
+        horizontalSpacing: CGFloat? = nil,
+        verticalAlignment: VerticalAlignment = .center,
+        verticalSpacing: CGFloat? = nil,
+        condition: @escaping ConditionHandler,
+        @ViewBuilder content: () -> Content
+    ) {
         self.horizontalAlignment = horizontalAlignment
         self.horizontalSpacing = horizontalSpacing
         self.verticalAlignment = verticalAlignment
@@ -31,7 +31,6 @@ public struct AdaptiveStack<Content: View>: View {
         self.content = content()
     }
     
-#warning("⚠️ add documentation")
     // convinence initializer for common conditions
     public init(
         horizontalAlignment: HorizontalAlignment = .center,

@@ -1,5 +1,13 @@
 import SwiftUI
 
+public extension EqualSizes {
+    enum HandleSize {
+        case height
+        case width
+        case all
+    }
+}
+
 public struct EqualSize: ViewModifier {
     @Environment(\.size) private var size
     @State private var frame: CGRect = .zero
@@ -11,33 +19,34 @@ public struct EqualSize: ViewModifier {
                     Color.clear.preference(key: SizeKey.self, value: [proxy.size])
                 }
             )
-            .frame(width: size?.width, height: size?.height)
+            .frame(width: size.width, height: size.height)
     }
 }
 
 public struct EqualSizes: ViewModifier {
-    @State private var longestViewWidth: CGFloat?
-    @State private var tallestViewHeight: CGFloat?
+    @State private var maxWidth : CGFloat?
+    @State private var maxHeight : CGFloat?
+    private let handleSize: HandleSize
+
+    init(handleSize: HandleSize = .all) {
+        self.handleSize = handleSize
+    }
 
     public func body(content: Content) -> some View {
         content
-                .onPreferenceChange(SizeKey.self, perform: { sizes in
-                    guard sizes.count > 0 else {
-                        #if DEBUG
-                        // switch to os.log logger
-                        print(">> preference has not been passed up the hierarchy")
-                        #endif
-                        return
-                    }
-                    self.longestViewWidth = sizes.map { $0.width }.max()
-                    self.tallestViewHeight = sizes.map { $0.height }.max()
-                })
-                .environment(\.size, size(longestViewWidth, tallestViewHeight))
-    }
-
-    private func size(_ width: CGFloat?, _ height: CGFloat?) -> CGSize? {
-        guard let width = width, let height = height else { return nil }
-        return CGSize(width: width, height: height)
+            .onPreferenceChange(SizeKey.self, perform: { sizes in
+                guard sizes.count > 0 else { return }
+                switch handleSize {
+                case .width:
+                    self.maxWidth = sizes.map { $0.width }.max()
+                case .height:
+                    self.maxHeight = sizes.map { $0.height }.max()
+                case .all:
+                    self.maxWidth = sizes.map { $0.width }.max()
+                    self.maxHeight = sizes.map { $0.height }.max()
+                }
+            })
+            .environment(\.size, (width: maxWidth, height: maxHeight))
     }
 }
 
@@ -47,7 +56,7 @@ public extension View {
         self.modifier(EqualSize())
     }
 
-    func equalSizes() -> some View {
-        self.modifier(EqualSizes())
+    func equalSizes(sizeType: EqualSizes.HandleSize = .all) -> some View {
+        self.modifier(EqualSizes(handleSize: sizeType))
     }
 }

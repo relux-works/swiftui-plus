@@ -36,9 +36,7 @@ struct FixedTransactionTransition: ViewModifier {
 		}
 		.animation(animation, value: isPresentInBody)
 		.animation(animation, value: isPresentInParentContainer)
-		.onAppear {
-			isPresentInBody = true
-		}
+		.onAppear { isPresentInBody = true }
 	}
 }
 
@@ -90,8 +88,8 @@ public extension View {
     func transition(
             _ transition: AnyTransition,
             withAnimation animation: Animation = .default,
-            isPresentInParentContainer : Binding<Bool> = .constant(true),
-			manualToggle: Binding<Bool> = .constant(true)
+            isPresentInParentContainer: Binding<Bool>,
+			manualToggle: Binding<Bool>
     ) -> some View {
         self.modifier(
                 FixedTransactionTransition(

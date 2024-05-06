@@ -9,24 +9,27 @@ public struct WebView: View {
     }
 
     public var body: some View {
-        if let url = URL(string: props.url) {
-            WKWebViewRepresentable(url: url)
-        } else {
-            ProgressView { EmptyView() }
-        }
+        WKWebViewRepresentable(request: props.request)
+    }
+}
+
+class FullScreenWKWebView: WKWebView {
+    override var safeAreaInsets: UIEdgeInsets {
+        UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
 }
 
 struct WKWebViewRepresentable: UIViewRepresentable {
+    var request: URLRequest
 
-    var url: URL
-
-    func makeUIView(context: Context) -> WKWebView {
-        WKWebView()
+    func makeUIView(context: Context) -> FullScreenWKWebView {
+        let wv = FullScreenWKWebView()
+        wv.backgroundColor = .black
+        wv.underPageBackgroundColor = .black
+        return wv
     }
 
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        let request = URLRequest(url: url)
+    func updateUIView(_ webView: FullScreenWKWebView, context: Context) {
         webView.load(request)
     }
 }

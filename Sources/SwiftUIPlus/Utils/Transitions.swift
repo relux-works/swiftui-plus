@@ -41,6 +41,6 @@ struct BlurFadeModifier: ViewModifier {
         content
             .scaleEffect(isActive ? 1.5 : 1) // lagging behind effect
             .blur(radius: isActive ? 8 : 0)
-            .opacity(isActive ? 0 : 0.7)
+            .opacity(isActive ? 0 : 1)
     }
 }

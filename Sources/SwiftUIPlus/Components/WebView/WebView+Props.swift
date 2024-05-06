@@ -2,12 +2,12 @@ import Foundation
 
 public extension WebView {
     struct Props {
-        public let url: String
+        public let request: URLRequest
 
         public init(
-                url: String
+            request: URLRequest
         ) {
-            self.url = url
+            self.request = request
         }
     }
 }

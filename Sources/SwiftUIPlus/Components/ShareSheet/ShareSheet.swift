@@ -11,7 +11,14 @@ public struct ShareSheet: UIViewControllerRepresentable {
 
     public func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        return controller
+        controller.completionWithItemsHandler = { (
+            activityType: UIActivity.ActivityType?,
+            completed: Bool,
+            items: [Any]?,
+            err: Error?
+        ) in
+        }
+            return controller
     }
 
     public func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {

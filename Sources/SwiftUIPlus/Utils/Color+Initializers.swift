@@ -29,6 +29,16 @@ public extension Color {
                 opacity: alpha
         )
     }
+
+    init(hexa: UInt) {
+        self.init(
+            .sRGB,
+            red: Double((hexa >> 24) & 0xff) / 255,
+            green: Double((hexa >> 16) & 0xff) / 255,
+            blue: Double((hexa >> 08) & 0xff) / 255,
+            opacity: Double((hexa >> 00) & 0xff) / 255
+        )
+    }
 }
 
 #if canImport(UIKit)

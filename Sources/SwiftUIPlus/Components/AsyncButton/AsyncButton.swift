@@ -8,8 +8,9 @@ public struct TabViewItemButtonStyle: ButtonStyle {
 }
 
 public struct AsyncButton<Label: View>: View {
-    let actionPriority: TaskPriority?
-    let actionOptions: Set<AsyncButton<Label>.ActionOption>
+    private let actionPriority: TaskPriority?
+    private let actionOptions: Set<AsyncButton<Label>.ActionOption>
+    private let role: ButtonRole?
     let action: () async -> Void
 	
 	@State private var isDisabled = false
@@ -19,19 +20,19 @@ public struct AsyncButton<Label: View>: View {
     public init(
         actionPriority: TaskPriority? = nil,
         actionOptions: Set<AsyncButton<Label>.ActionOption> = [ActionOption.disableButton],
+        role: ButtonRole? = .none,
         action: @escaping () async -> Void,
         @ViewBuilder label: @escaping () -> Label
     ) {
         self.actionPriority = actionPriority
         self.actionOptions = actionOptions
+        self.role = role
         self.action = action
         self.label = label()
     }
     
-
-
 	public var body: some View {
-		Button( action: customizedAction) {
+		Button(role: role, action: customizedAction) {
 			label
 				.opacity(showProgress ? 0 : 1)
 				.overlay(progressView)

@@ -13,4 +13,17 @@ extension View {
                 }
         )
     }
+
+    @inlinable public func onChange<V>(
+            of value: V,
+            priority: _Concurrency.TaskPriority = .userInitiated,
+            @_inheritActorContext perform action: @escaping @Sendable (_ newValue: V) async -> Void
+    ) -> some View where V : Equatable {
+        onChange(
+                of: value,
+                perform: { output in
+                    Task(priority: priority) { await action(output) }
+                }
+        )
+    }
 }

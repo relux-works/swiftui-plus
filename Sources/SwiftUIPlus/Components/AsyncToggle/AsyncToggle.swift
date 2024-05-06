@@ -29,15 +29,21 @@ public struct AsyncToggle<Label: View>: View {
         )
 
         Toggle(isOn: proxy, label: label)
-                .overlay(progressPlate, alignment: .trailing)
+            .disabled(inProgress)
+            .overlay(progressPlate(isOn: proxy.wrappedValue), alignment: .trailing)
+            .animation(.easeInOut, value: proxy.wrappedValue)
     }
 
     @ViewBuilder
-    private var progressPlate: some View {
+    private func progressPlate(isOn: Bool) -> some View {
         switch inProgress {
         case true:
-            ProgressView {EmptyView()}
-                    .padding(.horizontal)
+            HStack {
+                ProgressView {EmptyView()}
+                    .padding(.horizontal, 56)
+                    .tint(.gray)
+            }
+
         case false:
             EmptyView()
         }

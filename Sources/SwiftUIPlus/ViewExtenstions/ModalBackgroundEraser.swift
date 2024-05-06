@@ -35,7 +35,6 @@ struct SuperviewBackgroundEraser: UIViewRepresentable {
 		let view = UIView()
 		DispatchQueue.main.async {
 			view.superview?.superview?.backgroundColor = .clear
-			view.superview?.superview?.backgroundColor = .clear
 		}
 		return view
 	}

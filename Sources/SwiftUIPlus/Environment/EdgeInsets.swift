@@ -2,10 +2,9 @@ import SwiftUI
 
 public struct SafeAreaEdgeInsetsKey: EnvironmentKey {
     public static var defaultValue: EdgeInsets {
-        let keyWindows = UIApplication.shared.windows.filter { $0.isKeyWindow }.first ??
-                UIApplication.shared.windows[0]
-
-        return keyWindows.safeAreaEdgeInsets
+        UIApplication.shared.windows
+            .first { $0.isKeyWindow }?
+            .safeAreaEdgeInsets ?? .init()
     }
 }
 
