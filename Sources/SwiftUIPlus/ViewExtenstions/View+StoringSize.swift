@@ -38,6 +38,7 @@ public extension View {
 }
 
 extension ViewFrameReader {
+    @MainActor
     final class LocalState: ObservableObject {
         let queue: DispatchQueue
         

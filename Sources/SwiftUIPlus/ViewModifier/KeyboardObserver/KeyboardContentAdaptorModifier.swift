@@ -8,37 +8,42 @@ extension View {
     }
 }
 
+extension AdaptsToSoftwareKeyboard {
+    final class LocalState: ObservableObject {
+        @Published private(set) var keyboardHeight: CGFloat = 0
+
+        func subscribeToKeyboardEvents() {
+            Publishers
+                .Merge(keyboardWillOpen, keyboardWillHide)
+                .subscribe(on: RunLoop.main)
+                .assign(to: &$keyboardHeight)
+        }
+
+        private let keyboardWillOpen = NotificationCenter.default
+            .publisher(for: UIResponder.keyboardWillShowNotification)
+            .map { $0.userInfo![UIResponder.keyboardFrameEndUserInfoKey] as? CGRect }
+            .map { $0?.height ?? 0}
+
+        private let keyboardWillHide =  NotificationCenter.default
+            .publisher(for: UIResponder.keyboardWillHideNotification)
+            .map { _ in CGFloat.zero }
+    }
+}
 struct AdaptsToSoftwareKeyboard: ViewModifier {
-    @State private var keyboardHeight: CGFloat = 0
     @Environment(\.safeAreaEdgeInsets) private var insets
+    @StateObject private var ls: LocalState = .init()
 
     func body(content: Content) -> some View {
         VStack(spacing: 0) {
-            if keyboardHeight > 0 {
+            if ls.keyboardHeight > 0 {
                 Spacer()
             }
             content
         }
-            .padding(.bottom, max(self.keyboardHeight - insets.bottom, 0))
-            .animation (.easeInOut, value: self.keyboardHeight)
+            .padding(.bottom, max(ls.keyboardHeight - insets.bottom, 0))
+            .animation (.easeInOut, value: ls.keyboardHeight)
             .ignoresSafeArea(.keyboard)
-            .onAppear(perform: subscribeToKeyboardEvents)
-    }
-
-    private let keyboardWillOpen = NotificationCenter.default
-        .publisher(for: UIResponder.keyboardWillShowNotification)
-        .map { $0.userInfo![UIResponder.keyboardFrameEndUserInfoKey] as? CGRect }
-        .map { $0?.height ?? 0}
-
-    private let keyboardWillHide =  NotificationCenter.default
-        .publisher(for: UIResponder.keyboardWillHideNotification)
-        .map { _ in CGFloat.zero }
-
-    private func subscribeToKeyboardEvents() {
-        _ = Publishers
-            .Merge(keyboardWillOpen, keyboardWillHide)
-            .subscribe(on: RunLoop.main)
-            .assign(to: \.self.keyboardHeight, on: self)
+            .onAppear(perform: ls.subscribeToKeyboardEvents)
     }
 }
 

@@ -19,9 +19,9 @@ public class KeyboardObserver: ObservableObject {
         .map { _ -> CGFloat in 0 }
 
     public init() {
-        _ = Publishers
+        Publishers
             .Merge(keyboardWillShow, keyboardWillHide)
             .subscribe(on: DispatchQueue.main)
-            .assign(to: \.currentHeight, on: self)
+            .assign(to: &$currentHeight)
     }
 }
