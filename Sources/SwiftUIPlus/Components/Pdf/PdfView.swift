@@ -3,10 +3,35 @@ import PDFKit
 
 public extension PDFKitView {
     enum VType {
-        case remote(url: URL)
-        case local(data: Data)
+        case remote(url: URL, config: Config = .defaultValue)
+        case local(data: Data, config: Config = .defaultValue)
+    }
+
+    public struct Config {
+        let bgColor: UIColor
+        let minScaleFactor: CGFloat?
+        let maxScaleFactor: CGFloat?
+        let displayMode: PDFDisplayMode
+        let displayDirection: PDFDisplayDirection
+
+        public init(
+            bgColor: UIColor = .clear,
+            minScaleFactor: CGFloat? = .none,
+            maxScaleFactor: CGFloat? = .none,
+            displayMode: PDFDisplayMode = .singlePageContinuous,
+            displayDirection: PDFDisplayDirection = .vertical
+        ) {
+            self.bgColor = bgColor
+            self.minScaleFactor = minScaleFactor
+            self.maxScaleFactor = maxScaleFactor
+            self.displayMode = displayMode
+            self.displayDirection = displayDirection
+        }
+
+        public static let defaultValue: Self = .init()
     }
 }
+
 public struct PDFKitView: View {
     var type: VType
 
@@ -30,15 +55,14 @@ struct PDFKitRepresentedView: UIViewRepresentable {
         let pdfView = PDFView()
 
         switch type {
-        case let .remote(url):
+        case let .remote(url, cfg):
             pdfView.document = PDFDocument(url: url)
-        case let .local(data):
+            pdfView.apply(cfg)
+        case let .local(data, cfg):
             pdfView.document = PDFDocument(data: data)
+            pdfView.apply(cfg)
         }
 
-        pdfView.backgroundColor = .clear
-        pdfView.displayMode = .singlePageContinuous
-        pdfView.displayDirection = .vertical
         pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit
         pdfView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -50,6 +74,16 @@ struct PDFKitRepresentedView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UIView, context: UIViewRepresentableContext<PDFKitRepresentedView>) {
+    }
+}
+
+extension PDFView {
+    func apply(_ config: PDFKitView.Config) {
+        self.backgroundColor = config.bgColor
+        self.displayMode = config.displayMode
+        self.displayDirection = config.displayDirection
+        self.minScaleFactor = config.minScaleFactor ?? self.minScaleFactor
+        self.maxScaleFactor = config.maxScaleFactor ?? self.maxScaleFactor
     }
 }
 
