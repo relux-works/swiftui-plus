@@ -3,6 +3,7 @@ import UIKit
 
 public protocol IDeepLinkProcessor {
     func process(url: URL, in parentVC: UIViewController?)
+    func validate(url: URL, in parentVC: UIViewController?) -> Bool
 }
 
 public struct DeepLinkProcessor: IDeepLinkProcessor {
@@ -13,7 +14,13 @@ public struct DeepLinkProcessor: IDeepLinkProcessor {
     }
 
     public func process(url: URL, in parentVC: UIViewController?) {
-        let _ = handlers
-            .contains { $0.process(url: url, in: parentVC) }
+        for handler in handlers {
+            guard handler.validate(url: url, in: parentVC) else { return }
+            handler.process(url: url, in: parentVC)
+        }
+    }
+
+    public func validate(url: URL, in parentVC: UIViewController?) -> Bool {
+        handlers.contains { $0.validate(url: url, in: parentVC) }
     }
 }
