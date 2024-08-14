@@ -14,10 +14,9 @@ public struct DeepLinkProcessor: IDeepLinkProcessor {
     }
 
     public func process(url: URL, in parentVC: UIViewController?) {
-        for handler in handlers {
-            guard handler.validate(url: url, in: parentVC) else { return }
-            handler.process(url: url, in: parentVC)
-        }
+        handlers
+            .first { $0.validate(url: url, in: parentVC) }?
+            .process(url: url, in: parentVC)
     }
 
     public func validate(url: URL, in parentVC: UIViewController?) -> Bool {
