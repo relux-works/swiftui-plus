@@ -24,18 +24,28 @@ public struct CubeRotationModifier: ViewModifier {
         GeometryReader { gr in
             let rect = gr.frame(in: .global)
             content
-                .frame(width: rect.width, height: rect.height)
                 .rotation3DEffect(
                     .init(degrees: self.calcAngle(xOffset: rect.minX, rotationDegree: props.rotationDegree)),
                     axis: (x: 0, y: 1, z: 0),
                     anchor: rect.minX > 0 ? .leading : .trailing,
                     perspective: props.perspective
                 )
+                .ignoresSafeArea(edges: props.ignoreSafeAreaEdges)
         }
     }
 
     private func calcAngle(xOffset: CGFloat, rotationDegree: CGFloat) -> Double {
         let tempAngle = xOffset / (0.5 * bounds.width)
         return tempAngle * rotationDegree
+    }
+}
+
+fileprivate extension View {
+    @ViewBuilder
+    func ignoresSafeArea(edges: Edge.Set?) -> some View {
+        switch edges {
+            case .none: self
+            case let .some(edges): self.ignoresSafeArea(edges: edges)
+        }
     }
 }
