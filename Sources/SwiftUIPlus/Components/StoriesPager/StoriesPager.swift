@@ -1,29 +1,31 @@
 import SwiftUI
 
-public struct StoriesPager<T, Content, SwitchModifier>: View
-    where T: Identifiable & Hashable, Content: View, SwitchModifier: ViewModifier {
+public struct StoriesPager<Model, Page, SwitchModifier>: View
+    where Model: Identifiable & Hashable, Page: View, SwitchModifier: ViewModifier {
 
-    @Binding private var current: T
-    private let models: [T]
-    private let storyBuilder: (T) -> Content
+    @Binding private var current: Model
+    private let models: [Model]
+    private let storyBuilder: (Model) -> Page
     private let switchStoryModifier: SwitchModifier
+    private let pages: [Model: Page]
 
     public init(
-        current: Binding<T>,
-        models: [T],
-        @ViewBuilder storyViewBuilder: @escaping (T) -> Content,
+        current: Binding<Model>,
+        models: [Model],
+        @ViewBuilder storyViewBuilder: @escaping (Model) -> Page,
         switchStoryModifier: SwitchModifier = CubeRotationModifier()
     ) {
         self._current = current
         self.models = models
         self.storyBuilder = storyViewBuilder
         self.switchStoryModifier = switchStoryModifier
+        self.pages = models.reduce(into: [Model: Page]()) { store, next in store[next] = storyViewBuilder(next)}
     }
 
     public var body: some View {
         TabView(selection: $current) {
             ForEach(models) { model in
-                storyBuilder(model)
+                pages[model]
                     .tag(model)
                     .modifier(switchStoryModifier)
             }
