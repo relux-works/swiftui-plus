@@ -2,10 +2,11 @@ import SwiftUI
 
 public struct PressHandleButtonStyle: ButtonStyle {
     private let props: Props
-    @State private var prevHoldState = false
+    @Binding private var pressed: Bool
     @State private var changeTask : Task<Void, any Error>?
 
     public init(props: Props) {
+        self._pressed = props.pressed
         self.props = props
     }
 
@@ -20,12 +21,8 @@ public struct PressHandleButtonStyle: ButtonStyle {
     private func reactOnPressState(pressed: Bool) {
         self.changeTask?.cancel()
         self.changeTask = Task.delayed(byTimeInterval: props.minDuration) { @MainActor in
-            guard prevHoldState != pressed else { return }
-            self.prevHoldState = pressed
-            switch pressed {
-                case true: props.reaction.onPress()
-                case false: props.reaction.onRelease()
-            }
+            guard self.pressed != pressed else { return }
+            self.pressed = pressed
         }
     }
 }

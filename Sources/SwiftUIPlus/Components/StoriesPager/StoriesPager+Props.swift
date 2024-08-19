@@ -26,18 +26,19 @@ extension StoriesPager {
 
 extension StoriesPager {
     public struct Reactions {
+        let contentHolded: Binding<Bool>?
+
         let onBack: (() -> ())?
         let onForward: (() -> ())?
-        let onContentHold: ((_ pressed: Bool) -> ())?
 
         public init(
+            contentHolded: Binding<Bool>? = .none,
             onBack: (() -> ())? = .none,
-            onForward: (() -> ())? = .none,
-            onContentHold: ((_ pressed: Bool) -> ())? = .none
+            onForward: (() -> ())? = .none
         ) {
+            self.contentHolded = contentHolded
             self.onBack = onBack
             self.onForward = onForward
-            self.onContentHold = onContentHold
         }
     }
 }
