@@ -1,8 +1,9 @@
 import SwiftUI
 
-public struct PressHandleButtonStyle: PrimitiveButtonStyle {
+public struct PressHandleButtonStyle: ButtonStyle {
     private let props: Props
-    @State var pressed: Bool = false
+    @State private var prevHoldState = false
+    @State private var changeTask : Task<Void, any Error>?
 
     public init(props: Props) {
         self.props = props
@@ -10,26 +11,22 @@ public struct PressHandleButtonStyle: PrimitiveButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-                .opacity(pressed ? props.pressConfig.opacity : 1.0)
-                .scaleEffect(pressed ? props.pressConfig.scale : 1.0)
-                .onTapGesture { configuration.trigger() }
-                .handlePress(
-                        onPress: onPress,
-                        onRelease: onRelease
-                )
-                .animation(.easeInOut)
+            .opacity(configuration.isPressed ? props.pressConfig.opacity : 1.0)
+            .scaleEffect(configuration.isPressed ? props.pressConfig.scale : 1.0)
+            .animation(.easeInOut)
+            .onChange(of: configuration.isPressed, perform: reactOnPressState)
     }
 
-    private func onPress() {
-        guard !pressed else { return }
-        pressed = true
-        props.reaction.onPress()
-    }
-
-    private func onRelease() {
-        guard pressed else { return }
-        pressed = false;
-        props.reaction.onRelease()
+    private func reactOnPressState(pressed: Bool) {
+        self.changeTask?.cancel()
+        self.changeTask = Task.delayed(byTimeInterval: props.minDuration) { @MainActor in
+            guard prevHoldState != pressed else { return }
+            self.prevHoldState = pressed
+            switch pressed {
+                case true: props.reaction.onPress()
+                case false: props.reaction.onRelease()
+            }
+        }
     }
 }
 

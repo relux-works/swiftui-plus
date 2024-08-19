@@ -25,7 +25,7 @@ public struct CubeRotationModifier: ViewModifier {
             let rect = gr.frame(in: .global)
             content
                 .rotation3DEffect(
-                    .init(degrees: self.calcAngle(xOffset: rect.minX, rotationDegree: props.rotationDegree)),
+                    .init(degrees: self.calcAngle(rect: rect, rotationDegree: props.rotationDegree)),
                     axis: (x: 0, y: 1, z: 0),
                     anchor: rect.minX > 0 ? .leading : .trailing,
                     perspective: props.perspective
@@ -34,8 +34,8 @@ public struct CubeRotationModifier: ViewModifier {
         }
     }
 
-    private func calcAngle(xOffset: CGFloat, rotationDegree: CGFloat) -> Double {
-        let tempAngle = xOffset / (0.5 * bounds.width)
+    private func calcAngle(rect: CGRect, rotationDegree: CGFloat) -> Double {
+        let tempAngle = rect.minX / (0.5 * bounds.width)
         return tempAngle * rotationDegree
     }
 }
