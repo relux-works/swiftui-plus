@@ -34,43 +34,43 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                 Button(action: {}) {
                     if #available(iOS 16.0, *) {
                         pages[model]
-                            .tag(model)
-                            .modifier(viewConfig.switchStoryModifier)
-                            .onTapGesture(perform: onTapContent)
+                          .onTapGesture(perform: onTapContent)
                     } else {
                         pages[model]
-                            .tag(model)
-                            .modifier(viewConfig.switchStoryModifier)
+                          .onTapGesture(perform: { reactions?.onForward })
                     }
                 }
-                .buttonStyle(
-                    PressHandleButtonStyle(props: .init(
-                        pressConfig: viewConfig.contentOnHoldConfig,
-                        minDuration: viewConfig.contentOnHoldMinDuration,
-                        reaction: (
-                            onPress: { reactOnHoldContent(true) },
-                            onRelease: { reactOnHoldContent(false) }
-                        )
-                    ))
-                )
+                    .buttonStyle(
+                        PressHandleButtonStyle(props: .init(
+                            pressConfig: viewConfig.contentOnHoldConfig,
+                            minDuration: viewConfig.contentOnHoldMinDuration,
+                            reaction: (
+                                onPress: { reactOnHoldContent(true) },
+                                onRelease: { reactOnHoldContent(false) }
+                            )
+                        ))
+                    )
+                    .tag(model)
+                    .modifier(viewConfig.switchStoryModifier)
             }
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
+            .tabViewStyle(.page(indexDisplayMode: .never))
     }
 }
 
 // reactions
 extension StoriesPager {
     private func reactOnBack() {
-        print("\(#file) \(#function)")
+        guard contentPressed.not else { return }
+        self.reactions?.onBack?()
     }
 
     private func reactOnForward() {
-        print("\(#file) \(#function)")
+        guard contentPressed.not else { return }
+        self.reactions?.onForward?()
     }
 
     private func onTapContent(_ location: CGPoint) {
-        guard contentPressed.not else { return }
         switch location.x < viewConfig.backToForwardAreaRatio * bounds.width {
             case true: reactOnBack()
             case false: reactOnForward()
@@ -78,7 +78,7 @@ extension StoriesPager {
     }
 
     private func reactOnHoldContent(_ presed: Bool) {
-        print("\(#file) \(#function) : \(presed)")
         self.contentPressed = presed
+        self.reactions?.onContentHold?(presed)
     }
 }
