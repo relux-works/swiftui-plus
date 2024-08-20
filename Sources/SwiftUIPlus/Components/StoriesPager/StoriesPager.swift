@@ -39,13 +39,15 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         TabView(selection: $currentId) {
             ForEach(models) { model in
                 Button(action: {}) {
-                    if #available(iOS 16.0, *) {
-                        pages[model.id]
-                          .onTapGesture(perform: onTapContent)
-                    } else {
-                        pages[model.id]
-                          .onTapGesture(perform: reactOnForward)
-                    }
+                    Group {
+                        if #available(iOS 16.0, *) {
+                            pages[model.id]
+                                .onTapGesture(perform: onTapContent)
+                        } else {
+                            pages[model.id]
+                                .onTapGesture(perform: reactOnForward)
+                        }
+                    }.transaction { $0.animation = .none } // removes default animations inherited from modals
                 }
                     .buttonStyle(
                         PressHandleButtonStyle(props: .init(
@@ -59,6 +61,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
             }
         }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            .animation(.linear, value: currentId)
     }
 }
 
