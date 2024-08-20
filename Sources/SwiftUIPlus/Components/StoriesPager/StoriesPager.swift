@@ -44,12 +44,12 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                           .onTapGesture(perform: onTapContent)
                     } else {
                         pages[model.id]
-                          .onTapGesture(perform: { reactions?.onForward })
+                          .onTapGesture(perform: reactOnForward)
                     }
                 }
                     .buttonStyle(
                         PressHandleButtonStyle(props: .init(
-                            pressed: reactions?.contentHolded ?? .constant(false),
+                            pressed: reactions?.contentHeld ?? .constant(false),
                             pressConfig: viewConfig.contentOnHoldConfig,
                             minDuration: viewConfig.contentOnHoldMinDuration
                         ))
@@ -65,13 +65,13 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
 // reactions
 extension StoriesPager {
     private func reactOnBack() {
-        guard let flag = reactions?.contentHolded?.wrappedValue, flag.not else { return }
-        self.reactions?.onBack?()
+        guard let flag = reactions?.contentHeld?.wrappedValue, flag.not else { return }
+        self.reactions?.navigationSubject?.send(.back)
     }
 
     private func reactOnForward() {
-        guard let flag = reactions?.contentHolded?.wrappedValue, flag.not else { return }
-        self.reactions?.onForward?()
+        guard let flag = reactions?.contentHeld?.wrappedValue, flag.not else { return }
+        self.reactions?.navigationSubject?.send(.forward)
     }
 
     private func onTapContent(_ location: CGPoint) {

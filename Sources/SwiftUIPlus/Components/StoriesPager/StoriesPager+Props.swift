@@ -1,4 +1,10 @@
 import Foundation
+import Combine
+
+public enum StoriesPagerNavigationType: Equatable {
+    case back
+    case forward
+}
 
 extension StoriesPager {
     public struct ViewConfig {
@@ -26,19 +32,15 @@ extension StoriesPager {
 
 extension StoriesPager {
     public struct Reactions {
-        let contentHolded: Binding<Bool>?
-
-        let onBack: (() -> ())?
-        let onForward: (() -> ())?
+        let contentHeld: Binding<Bool>?
+        let navigationSubject: PassthroughSubject<StoriesPagerNavigationType, Never>?
 
         public init(
-            contentHolded: Binding<Bool>? = .none,
-            onBack: (() -> ())? = .none,
-            onForward: (() -> ())? = .none
+            contentHeld: Binding<Bool>? = .none,
+            navigationSubject: PassthroughSubject<StoriesPagerNavigationType, Never>? = .none
         ) {
-            self.contentHolded = contentHolded
-            self.onBack = onBack
-            self.onForward = onForward
+            self.contentHeld = contentHeld
+            self.navigationSubject = navigationSubject
         }
     }
 }
