@@ -20,7 +20,9 @@ public struct PressHandleButtonStyle: ButtonStyle {
 
     private func reactOnPressState(pressed: Bool) {
         self.changeTask?.cancel()
-        self.changeTask = Task.delayed(byTimeInterval: props.minDuration) { @MainActor in
+        self.changeTask = Task.delayed(
+            byTimeInterval: pressed ? props.minDuration : 0
+        ) { @MainActor in
             guard self.pressed != pressed else { return }
             self.pressed = pressed
         }

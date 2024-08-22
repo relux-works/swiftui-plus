@@ -76,4 +76,35 @@ public extension View {
                 GeometryReader { gr in color(gr) }
         )
     }
+
+    func frameOnChange(
+        space: CoordinateSpace = .local,
+        when condition: ((CGRect)->Bool)? = nil,
+        logToConsole: Bool = false,
+        onChange: @escaping (CGRect)->()
+    ) -> some View {
+        let color: (GeometryProxy) -> Color = { gr in
+            DispatchQueue.main.async {
+                let frame = gr.frame(in: space)
+
+#if DEBUG
+                if logToConsole { print("storing size for: \(frame)") }
+#endif
+
+                if let condition {
+                    // condition is set, we need to evaluate it
+                    guard condition(frame) else {
+                        return
+                    }
+                    onChange(frame)
+                } else {
+                    onChange(frame)
+                }
+            }
+            return Color.clear
+        }
+
+        return self
+            .background(GeometryReader { gr in color(gr) })
+    }
 }

@@ -1,8 +1,23 @@
 import Foundation
 import Combine
 
+extension StoriesPager.Reactions {
+    enum NavigationType: Equatable {
+        case backward(from: Model.Id)
+        case forward(from: Model.Id)
+    }
+}
+extension StoriesPager.Reactions.NavigationType {
+    var asStoriesNavType: StoriesPagerNavigationType {
+        switch self {
+            case .backward: .backward
+            case .forward: .forward
+        }
+    }
+}
+
 public enum StoriesPagerNavigationType: Equatable {
-    case back
+    case backward
     case forward
 }
 

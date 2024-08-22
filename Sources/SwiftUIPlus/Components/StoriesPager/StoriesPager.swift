@@ -1,15 +1,32 @@
 import SwiftUI
+import Combine
 
 public protocol IStoryModel: Identifiable {
     associatedtype Id: Hashable
     var id: Id { get }
 }
 
+extension StoriesPager {
+    @MainActor
+    final class LocalState: ObservableObject {
+        var pagesRects: [Model.Id: CGRect] = [:]
+        let navigationSub: PassthroughSubject<Reactions.NavigationType, Never> = .init()
+        var navigationPub: AnyPublisher<StoriesPagerNavigationType, Never> {
+            navigationSub
+                .removeDuplicates()
+                .debounce(for: 0.15, scheduler: DispatchQueue.main)
+                .print(">>> nav ")
+                .map { $0.asStoriesNavType }
+                .eraseToAnyPublisher()
+        }
+    }
+}
+
 public struct StoriesPager<Model, Page, SwitchModifier>: View
     where Model: IStoryModel, Page: View, SwitchModifier: ViewModifier {
 
     @Environment(\.bounds) private var bounds
-
+    @StateObject private var ls: LocalState = .init()
     @Binding private var currentId: Model.Id
 
     private let models: [Model]
@@ -36,51 +53,74 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     }
 
     public var body: some View {
+        content
+            .animation(.linear, value: currentId)
+            .onReceive(ls.navigationPub) { self.reactions?.navigationSubject?.send($0) }
+    }
+
+    private var content: some View {
         TabView(selection: $currentId) {
             ForEach(models) { model in
-                Button(action: {}) {
-                    Group {
-                        if #available(iOS 16.0, *) {
-                            pages[model.id]
-                                .onTapGesture(perform: onTapContent)
-                        } else {
-                            pages[model.id]
-                                .onTapGesture(perform: reactOnForward)
-                        }
-                    }.transaction { $0.animation = .none } // removes default animations inherited from modals
-                }
-                    .buttonStyle(
-                        PressHandleButtonStyle(props: .init(
-                            pressed: reactions?.contentHeld ?? .constant(false),
-                            pressConfig: viewConfig.contentOnHoldConfig,
-                            minDuration: viewConfig.contentOnHoldMinDuration
-                        ))
-                    )
+                pageContent(model)
                     .tag(model.id)
                     .modifier(viewConfig.switchStoryModifier)
             }
         }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.linear, value: currentId)
+        .tabViewStyle(.page(indexDisplayMode: .never))
+    }
+
+    private func pageContent(_ model: Model) -> some View {
+        Button(action: {}) {
+            Group {
+                if #available(iOS 16.0, *) {
+                    pages[model.id]
+                        .onTapGesture { onTapContent(location: $0, activeId: currentId, triggeredId: model.id) }
+                }
+                else {
+                    pages[model.id]
+                        .onTapGesture { reactOnForward(activeId: currentId,triggeredId: model.id) }
+                }
+            }
+            .frameOnChange(space: .global) { ls.pagesRects[model.id] = $0 }
+            .transaction { $0.animation = .none } // removes default animations inherited from modals
+        }
+            .buttonStyle(
+                PressHandleButtonStyle(props: .init(
+                    pressed: reactions?.contentHeld ?? .constant(false),
+                    pressConfig: viewConfig.contentOnHoldConfig,
+                    minDuration: viewConfig.contentOnHoldMinDuration
+                ))
+            )
     }
 }
 
 // reactions
 extension StoriesPager {
-    private func reactOnBack() {
-        guard let flag = reactions?.contentHeld?.wrappedValue, flag.not else { return }
-        self.reactions?.navigationSubject?.send(.back)
+    private func reactOnBack(activeId: Model.Id, triggeredId: Model.Id) {
+        guard ableToHandleNavigation(triggered: triggeredId, contentHeld: reactions?.contentHeld)
+        else { return }
+        self.ls.navigationSub.send(.backward(from: triggeredId))
     }
 
-    private func reactOnForward() {
-        guard let flag = reactions?.contentHeld?.wrappedValue, flag.not else { return }
-        self.reactions?.navigationSubject?.send(.forward)
+    private func reactOnForward(activeId: Model.Id, triggeredId: Model.Id) {
+        guard ableToHandleNavigation(triggered: triggeredId, contentHeld: reactions?.contentHeld)
+        else { return }
+        self.ls.navigationSub.send(.forward(from: triggeredId))
     }
 
-    private func onTapContent(_ location: CGPoint) {
+    private func ableToHandleNavigation(triggered viewId: Model.Id, contentHeld: Binding<Bool>?) -> Bool {
+        guard let flag = contentHeld?.wrappedValue,
+              flag.not,
+              let rect = ls.pagesRects[viewId],
+              rect.origin.x == 0
+        else { return false }
+        return true
+    }
+
+    private func onTapContent(location: CGPoint, activeId: Model.Id, triggeredId: Model.Id) {
         switch location.x < viewConfig.backToForwardAreaRatio * bounds.width {
-            case true: reactOnBack()
-            case false: reactOnForward()
+            case true: reactOnBack(activeId: activeId, triggeredId: triggeredId)
+            case false: reactOnForward(activeId: activeId, triggeredId: triggeredId)
         }
     }
 }
