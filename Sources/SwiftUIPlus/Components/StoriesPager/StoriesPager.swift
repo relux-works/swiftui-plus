@@ -13,9 +13,7 @@ extension StoriesPager {
         let navigationSub: PassthroughSubject<Reactions.NavigationType, Never> = .init()
         var navigationPub: AnyPublisher<StoriesPagerNavigationType, Never> {
             navigationSub
-                .removeDuplicates()
                 .debounce(for: 0.15, scheduler: DispatchQueue.main)
-                .print(">>> nav ")
                 .map { $0.asStoriesNavType }
                 .eraseToAnyPublisher()
         }
@@ -97,23 +95,39 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
 // reactions
 extension StoriesPager {
     private func reactOnBack(activeId: Model.Id, triggeredId: Model.Id) {
-        guard ableToHandleNavigation(triggered: triggeredId, contentHeld: reactions?.contentHeld)
+        guard ableToHandleNavigation(active: activeId, triggered: triggeredId, contentHeld: reactions?.contentHeld)
         else { return }
         self.ls.navigationSub.send(.backward(from: triggeredId))
     }
 
     private func reactOnForward(activeId: Model.Id, triggeredId: Model.Id) {
-        guard ableToHandleNavigation(triggered: triggeredId, contentHeld: reactions?.contentHeld)
+        guard ableToHandleNavigation(active: activeId, triggered: triggeredId, contentHeld: reactions?.contentHeld)
         else { return }
         self.ls.navigationSub.send(.forward(from: triggeredId))
     }
 
-    private func ableToHandleNavigation(triggered viewId: Model.Id, contentHeld: Binding<Bool>?) -> Bool {
+    private func ableToHandleNavigation(active: Model.Id, triggered: Model.Id, contentHeld: Binding<Bool>?) -> Bool {
         guard let flag = contentHeld?.wrappedValue,
-              flag.not,
-              let rect = ls.pagesRects[viewId],
+              flag.not 
+        else {
+            print(">>>> handle tap while on hold: active: \(active), triggered: \(triggered)")
+            return false
+        }
+
+        guard active == triggered
+        else {
+            print(">>>> unordinary switch try: active: \(active), triggered: \(triggered)")
+            self.currentId = triggered // recovery mode
+            return false
+        }
+
+        guard let rect = ls.pagesRects[triggered],
               rect.origin.x == 0
-        else { return false }
+        else { 
+            print(">>>> handle tap while animation xOffset: \(ls.pagesRects[triggered]?.minX): active: \(active), triggered: \(triggered)")
+            return false
+        }
+
         return true
     }
 
