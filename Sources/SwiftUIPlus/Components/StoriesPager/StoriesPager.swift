@@ -9,7 +9,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     where Model: IStoryModel, Page: View, SwitchModifier: ViewModifier {
 
     @Environment(\.bounds) private var bounds
-    @StateObject private var ls: LocalState = .init()
+    @StateObject private var ls: LocalState
     @Binding private var currentId: Model.Id
     @Binding private var activeId: Model.Id?
 
@@ -36,6 +36,8 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
             .reduce(into: [Model.Id: Page]()) { store, next in
                 store[next.id] = viewConfig.storyViewBuilder(next)
             }
+
+        self._ls = .init(wrappedValue: .init(viewConfig: viewConfig))
     }
 
     public var body: some View {

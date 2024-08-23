@@ -28,19 +28,25 @@ extension StoriesPager {
         let backToForwardAreaRatio: CGFloat
         let contentOnHoldConfig: (opacity: CGFloat, scale: CGFloat)
         let contentOnHoldMinDuration: TimeInterval
+        let navigationDebounceDuration: TimeInterval
+        let activePageDebounceDuration: TimeInterval
 
         public init(
             @ViewBuilder storyViewBuilder: @escaping (Model) -> Page,
             switchStoryModifier: SwitchModifier = CubeRotationModifier(),
             backToForwardNavigationAreaRatio: CGFloat = 0.4,
             contentOnHoldConfig: (opacity: CGFloat, scale: CGFloat) = (opacity: 1, scale: 1),
-            contentOnHoldMinDuration: TimeInterval = 0.25
+            contentOnHoldMinDuration: TimeInterval = 0.25,
+            navigationDebounceDuration: TimeInterval = 0.2,
+            activePageDebounceDuration: TimeInterval = 0.1
         ) {
             self.storyViewBuilder = storyViewBuilder
             self.switchStoryModifier = switchStoryModifier
             self.backToForwardAreaRatio = backToForwardNavigationAreaRatio
             self.contentOnHoldConfig = contentOnHoldConfig
             self.contentOnHoldMinDuration = contentOnHoldMinDuration
+            self.navigationDebounceDuration = navigationDebounceDuration
+            self.activePageDebounceDuration = activePageDebounceDuration
         }
     }
 }
