@@ -18,6 +18,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
 
     private let viewConfig: ViewConfig
     private let reactions: Reactions?
+    private let coordinateSpace: String = "StoriesPager \(UUID().uuidString)"
 
     public init(
         currentId: Binding<Model.Id>,
@@ -42,6 +43,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
 
     public var body: some View {
         content
+            .coordinateSpace(name: coordinateSpace)
             .animation(.linear, value: currentId)
             .onReceive(ls.navigationPub) { self.reactions?.navigationSubject?.send($0) }
             .onReceive(ls.activePageIdPub) { self.activeId = $0 }
@@ -53,6 +55,9 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                 pageContent(model)
                     .tag(model.id)
                     .modifier(viewConfig.switchStoryModifier)
+                    .frameOnChange(space: .named(coordinateSpace)) { rect in
+                        ls.trackPageRects(currentPageId: currentId, targetPageId: model.id, rect: rect)
+                    }
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
@@ -69,9 +74,6 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                     pages[model.id]
                         .onTapGesture { reactOnForward(activeId: currentId,triggeredId: model.id) }
                 }
-            }
-            .frameOnChange(space: .global) { rect in
-                ls.trackPageRects(currentPageId: currentId, targetPageId: model.id, rect: rect)
             }
             .transaction { $0.animation = .none } // removes default animations inherited from modals
         }

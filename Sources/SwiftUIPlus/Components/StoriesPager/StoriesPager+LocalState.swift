@@ -6,6 +6,7 @@ extension StoriesPager {
     final class LocalState: ObservableObject {
         private(set) var pagesRects: [Model.Id: CGRect] = [:]
         private let viewConfig: StoriesPager.ViewConfig
+        private var initialOffsetY: CGFloat?
 
         init(viewConfig: StoriesPager.ViewConfig) {
             self.viewConfig = viewConfig
@@ -35,10 +36,20 @@ extension StoriesPager {
 
         func trackPageRects(currentPageId: Model.Id, targetPageId: Model.Id, rect: CGRect) {
             self.pagesRects[targetPageId] = rect
+            if self.initialOffsetY == nil { self.initialOffsetY = rect.minY }
+
             if currentPageId == targetPageId {
-                let placedInViewPort = rect.minX == 0
+                let startPoint = CGPoint(x: rect.minX, y: rect.minY - (self.initialOffsetY ?? 0))
+                let placedInViewPort = startPoint.distance == 0
                 self.activePageIdSub.send(placedInViewPort ? targetPageId : .none)
             }
         }
+    }
+}
+
+fileprivate 
+extension CGPoint {
+    var distance: CGFloat {
+        sqrt(pow(self.x, 2) + pow(self.y, 2))
     }
 }

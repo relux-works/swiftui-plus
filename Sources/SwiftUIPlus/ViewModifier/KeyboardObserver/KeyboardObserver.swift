@@ -7,7 +7,7 @@ public class KeyboardObserver: ObservableObject {
 
     @Published public private(set) var shown: Bool = false
     @Published public private(set) var currentHeight: CGFloat = 0 {
-        didSet { DispatchQueue.main.async { [weak self] in self?.shown = (self?.currentHeight ?? 0) > 0 } }
+        didSet { print(">>> KeyboardObserver didset currentHeight: \(currentHeight)") }
     }
 
     let keyboardWillShow = NotificationCenter.default
@@ -23,5 +23,9 @@ public class KeyboardObserver: ObservableObject {
             .Merge(keyboardWillShow, keyboardWillHide)
             .subscribe(on: DispatchQueue.main)
             .assign(to: &$currentHeight)
+
+        $currentHeight
+            .map{$0 != 0 }
+            .assign(to: &$shown)
     }
 }
