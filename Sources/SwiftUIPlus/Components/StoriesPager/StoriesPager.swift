@@ -9,13 +9,29 @@ public protocol IStoryModel: Identifiable {
 extension StoriesPager {
     @MainActor
     final class LocalState: ObservableObject {
-        var pagesRects: [Model.Id: CGRect] = [:]
+        private(set) var pagesRects: [Model.Id: CGRect] = [:]
+
+        let activePageIdSub: PassthroughSubject<Model.Id?, Never> = .init()
+        var activePageIdPub: AnyPublisher<Model.Id?, Never> {
+            activePageIdSub
+                .removeDuplicates()
+                .eraseToAnyPublisher()
+        }
+
         let navigationSub: PassthroughSubject<Reactions.NavigationType, Never> = .init()
         var navigationPub: AnyPublisher<StoriesPagerNavigationType, Never> {
             navigationSub
                 .debounce(for: 0.15, scheduler: DispatchQueue.main)
                 .map { $0.asStoriesNavType }
                 .eraseToAnyPublisher()
+        }
+
+        func trackPageRects(currentPageId: Model.Id, targetPageId: Model.Id, rect: CGRect) {
+            self.pagesRects[targetPageId] = rect
+            if currentPageId == targetPageId {
+                let placedInViewPort = rect.minX == 0
+                self.activePageIdSub.send(placedInViewPort ? targetPageId : .none)
+            }
         }
     }
 }
@@ -26,6 +42,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     @Environment(\.bounds) private var bounds
     @StateObject private var ls: LocalState = .init()
     @Binding private var currentId: Model.Id
+    @Binding private var activeId: Model.Id?
 
     private let models: [Model]
     private let pages: [Model.Id: Page]
@@ -35,11 +52,13 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
 
     public init(
         currentId: Binding<Model.Id>,
+        activeId: Binding<Model.Id?> = .constant(.none),
         models: [Model],
         viewConfig: ViewConfig,
         reactions: Reactions? = .none
     ) {
         self._currentId = currentId
+        self._activeId = activeId
         self.models = models
         self.viewConfig = viewConfig
         self.reactions = reactions
@@ -54,6 +73,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         content
             .animation(.linear, value: currentId)
             .onReceive(ls.navigationPub) { self.reactions?.navigationSubject?.send($0) }
+            .onReceive(ls.activePageIdPub) { self.activeId = $0 }
     }
 
     private var content: some View {
@@ -79,7 +99,9 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                         .onTapGesture { reactOnForward(activeId: currentId,triggeredId: model.id) }
                 }
             }
-            .frameOnChange(space: .global) { ls.pagesRects[model.id] = $0 }
+            .frameOnChange(space: .global) { rect in
+                ls.trackPageRects(currentPageId: currentId, targetPageId: model.id, rect: rect)
+            }
             .transaction { $0.animation = .none } // removes default animations inherited from modals
         }
             .buttonStyle(
