@@ -7,9 +7,15 @@ extension StoriesPager {
         private(set) var pagesRects: [Model.Id: CGRect] = [:]
         private let viewConfig: StoriesPager.ViewConfig
         private var initialOffsetY: CGFloat?
+        private(set) var inAnimation: Bool = false
 
         init(viewConfig: StoriesPager.ViewConfig) {
             self.viewConfig = viewConfig
+        }
+
+        func delayForAnimation() {
+            inAnimation = true
+            Task.delayed(byTimeInterval: 0.3) { @MainActor in self.inAnimation = false }
         }
 
         let activePageIdSub: PassthroughSubject<Model.Id?, Never> = .init()
@@ -32,6 +38,21 @@ extension StoriesPager {
                 )
                 .map { $0.asStoriesNavType }
                 .eraseToAnyPublisher()
+        }
+
+        func onContentFrameChange(_ rect: CGRect, bounds: CGRect, models: [Model]) {
+            guard inAnimation.not else { return }
+
+            let progress = abs(rect.minX / bounds.width)
+            let progressIntPart = progress.asIntTruncating
+            let progressFloatingPart = progress.truncatingRemainder(dividingBy: 1)
+
+            guard let id = models[safe: progressIntPart]?.id
+            else { return }
+
+            let activeModelId = progressFloatingPart == 0 ? id : nil
+
+            activePageIdSub.send(activeModelId)
         }
 
         func trackPageRects(currentPageId: Model.Id, targetPageId: Model.Id, rect: CGRect) {

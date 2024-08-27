@@ -46,10 +46,76 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
             .coordinateSpace(name: coordinateSpace)
             .animation(.linear, value: currentId)
             .onReceive(ls.navigationPub) { self.reactions?.navigationSubject?.send($0) }
-            .onReceive(ls.activePageIdPub) { self.activeId = $0 }
+            .onReceive(ls.activePageIdPub.removeDuplicates()) { self.activeId = $0 }
     }
 
+    @ViewBuilder
     private var content: some View {
+        if #available(iOS 17.0, *) {
+            scrollViewPageContent
+                .onReceive(ls.activePageIdPub.removeDuplicates()) { active in
+                    guard let active, active != currentId else { return }
+                    self.currentId = active
+                }
+        } else {
+            tabViewPagesContent
+        }
+    }
+
+    @available(iOS 17, *)
+    private var scrollViewPageContent: some View {
+        Button(action: {}) {
+            ScrollViewReader { sr in
+                scrollviewPager
+                    .onAppear {
+                        ls.delayForAnimation()
+                        Task { @MainActor in
+                            sr.scrollTo(currentId)
+                        }
+                    }
+                    .onChange(of: currentId) { id in
+                        ls.delayForAnimation()
+                        Task { @MainActor in
+                            withAnimation(.linear) { sr.scrollTo(id) }
+                        }
+                    }
+                    .onTapGesture {
+                        ls.delayForAnimation()
+                        onTapContent(location: $0, activeId: currentId, triggeredId: currentId)
+                    }
+            }
+            .transaction{ $0.animation = .none }
+        }
+        .buttonStyle(
+            PressHandleButtonStyle(props: .init(
+                pressed: reactions?.contentHeld ?? .constant(false),
+                pressConfig: viewConfig.contentOnHoldConfig,
+                minDuration: viewConfig.contentOnHoldMinDuration
+            ))
+        )
+    }
+
+    @available(iOS 17, *)
+    private var scrollviewPager: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 0) {
+                ForEach(models) { model in
+                    pages[model.id]
+                    .containerRelativeFrame([.horizontal, .vertical])
+                    .modifyWithCubeRotation
+                    .id(model.id)
+                }
+            }
+            .frameOnChange(space: .named(coordinateSpace)) { rect in
+                ls.onContentFrameChange(rect, bounds: self.bounds, models: self.models)
+            }
+        }
+        .scrollTargetBehavior(.paging)
+        .containerRelativeFrame(.horizontal, count: 1, spacing: 0)
+        .scrollClipDisabled()
+    }
+
+    private var tabViewPagesContent: some View {
         TabView(selection: $currentId) {
             ForEach(models) { model in
                 pageContent(model)
@@ -116,11 +182,13 @@ extension StoriesPager {
             return false
         }
 
-        guard let rect = ls.pagesRects[triggered],
-              rect.origin.x == 0
-        else { 
-            print(">>>> handle tap while animation xOffset: \(ls.pagesRects[triggered]?.minX): active: \(active), triggered: \(triggered)")
-            return false
+        if #unavailable(iOS 17) {
+            guard let rect = ls.pagesRects[triggered],
+                  rect.origin.x == 0
+            else {
+                print(">>>> handle tap while animation xOffset: \(ls.pagesRects[triggered]?.minX.description ?? "NaN"): active: \(active), triggered: \(triggered)")
+                return false
+            }
         }
 
         return true

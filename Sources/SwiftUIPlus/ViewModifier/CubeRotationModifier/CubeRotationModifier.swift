@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 extension View {
     public var modifyWithCubeRotation: some View {
@@ -10,6 +11,8 @@ extension View {
     }
 }
 
+
+
 public struct CubeRotationModifier: ViewModifier {
     @Environment(\.bounds) private var bounds
     private let props: Props
@@ -20,9 +23,12 @@ public struct CubeRotationModifier: ViewModifier {
         self.props = props
     }
 
+    @State private var rect: CGRect = .zero
+
     public func body(content: Content) -> some View {
-        GeometryReader { gr in
-            let rect = gr.frame(in: .global)
+        ZStack {
+            Color.clear
+                .storingSize(in: $rect, space: .global)
             content
                 .rotation3DEffect(
                     .init(degrees: self.calcAngle(rect: rect, rotationDegree: props.rotationDegree)),
