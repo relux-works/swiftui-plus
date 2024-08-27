@@ -7,19 +7,35 @@ extension StoriesPager.Reactions {
         case forward(from: Model.Id)
     }
 }
+
 extension StoriesPager.Reactions.NavigationType {
     var asStoriesNavType: StoriesPagerNavigationType {
         switch self {
-            case .backward: .backward
-            case .forward: .forward
+            case let .backward(id): .backward(id: id.description)
+            case let .forward(id): .forward(id: id.description)
         }
     }
 }
 
-public enum StoriesPagerNavigationType: Equatable {
-    case backward
-    case forward
+public enum StoriesPagerNavigationType {
+    case backward(id: CustomStringConvertible)
+    case forward(id: CustomStringConvertible)
+
+    public var targetPageId: CustomStringConvertible {
+        switch self {
+            case let .forward(id): return id
+            case let .backward(id): return id
+        }
+    }
 }
+
+extension StoriesPagerNavigationType: Identifiable, Equatable {
+    public var id: String { "\(self)" }
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
 
 extension StoriesPager {
     public struct ViewConfig {

@@ -1,7 +1,7 @@
 import SwiftUI
 
 public protocol IStoryModel: Identifiable {
-    associatedtype Id: Hashable
+    associatedtype Id: Hashable, CustomStringConvertible
     var id: Id { get }
 }
 
@@ -111,10 +111,12 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                             .id(model.id)
                     }
                 }.background {
-                    Color.clear
-                        .frameOnChange(space: .named(coordinateSpace)) { rect in
-                            ls.onContentFrameChange(rect, bounds: self.bounds, models: self.models)
-                        }
+                    GeometryReader { gr in
+                        Color.clear
+                            .onChange(of: gr.frame(in: .named(coordinateSpace))) { rect in
+                                ls.onContentFrameChange(rect, bounds: self.bounds, models: self.models)
+                            }
+                    }
                 }
         }
         .scrollTargetBehavior(.paging)
@@ -178,22 +180,22 @@ extension StoriesPager {
         guard let flag = contentHeld?.wrappedValue,
               flag.not 
         else {
-            print(">>>> handle tap while on hold: active: \(active), triggered: \(triggered)")
-            return false
-        }
-
-        guard active == triggered
-        else {
-            print(">>>> unordinary switch try: active: \(active), triggered: \(triggered)")
-            self.currentId = triggered // recovery mode
+            print(">>> stories pager: handle tap while on hold: active: \(active), triggered: \(triggered)")
             return false
         }
 
         if #unavailable(iOS 17) {
+            guard active == triggered
+            else {
+                print(">>> stories pager: unordinary switch try: active: \(active), triggered: \(triggered)")
+                self.currentId = triggered // recovery mode
+                return false
+            }
+
             guard let rect = ls.pagesRects[triggered],
                   rect.origin.x == 0
             else {
-                print(">>>> handle tap while animation xOffset: \(ls.pagesRects[triggered]?.minX.description ?? "NaN"): active: \(active), triggered: \(triggered)")
+                print(">>> stories pager: handle tap while animation xOffset: \(ls.pagesRects[triggered]?.minX.description ?? "NaN"): active: \(active), triggered: \(triggered)")
                 return false
             }
         }
