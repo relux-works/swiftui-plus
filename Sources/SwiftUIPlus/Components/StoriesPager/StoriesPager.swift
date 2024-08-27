@@ -47,6 +47,9 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
             .animation(.linear, value: currentId)
             .onReceive(ls.navigationPub) { self.reactions?.navigationSubject?.send($0) }
             .onReceive(ls.activePageIdPub.removeDuplicates()) { self.activeId = $0 }
+            .onChange(of: currentId) { new in
+                print(">>> stories pager currentId change: to \(new)")
+            }
     }
 
     @ViewBuilder
@@ -54,6 +57,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         if #available(iOS 17.0, *) {
             scrollViewPageContent
                 .onReceive(ls.activePageIdPub.removeDuplicates()) { active in
+                    print(">>> stories pager activeId pub: \(active)")
                     guard let active, active != currentId else { return }
                     self.currentId = active
                 }
@@ -98,17 +102,20 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     @available(iOS 17, *)
     private var scrollviewPager: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 0) {
-                ForEach(models) { model in
-                    pages[model.id]
-                    .containerRelativeFrame([.horizontal, .vertical])
-                    .modifyWithCubeRotation
-                    .id(model.id)
+                LazyHStack(spacing: 0) {
+                    ForEach(models) { model in
+                        pages[model.id]
+                            .frame(width: bounds.width)
+                            .containerRelativeFrame([.horizontal])
+                            .modifyWithCubeRotation
+                            .id(model.id)
+                    }
+                }.background {
+                    Color.clear
+                        .frameOnChange(space: .named(coordinateSpace)) { rect in
+                            ls.onContentFrameChange(rect, bounds: self.bounds, models: self.models)
+                        }
                 }
-            }
-            .frameOnChange(space: .named(coordinateSpace)) { rect in
-                ls.onContentFrameChange(rect, bounds: self.bounds, models: self.models)
-            }
         }
         .scrollTargetBehavior(.paging)
         .containerRelativeFrame(.horizontal, count: 1, spacing: 0)
