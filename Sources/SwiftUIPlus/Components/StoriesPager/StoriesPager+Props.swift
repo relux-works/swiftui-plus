@@ -69,13 +69,16 @@ extension StoriesPager {
 
 extension StoriesPager {
     public struct Reactions {
+        let activeId: Binding<Model.Id?>
         let contentHeld: Binding<Bool>?
         let navigationSubject: PassthroughSubject<StoriesPagerNavigationType, Never>?
 
         public init(
+            activeId: Binding<Model.Id?> = .constant(.none),
             contentHeld: Binding<Bool>? = .none,
             navigationSubject: PassthroughSubject<StoriesPagerNavigationType, Never>? = .none
         ) {
+            self.activeId = activeId
             self.contentHeld = contentHeld
             self.navigationSubject = navigationSubject
         }

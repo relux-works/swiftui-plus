@@ -11,24 +11,22 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     @Environment(\.bounds) private var bounds
     @StateObject private var ls: LocalState
     @Binding private var currentId: Model.Id
-    @Binding private var activeId: Model.Id?
 
     private let models: [Model]
     private let pages: [Model.Id: Page]
 
     private let viewConfig: ViewConfig
     private let reactions: Reactions?
-    private let coordinateSpace: String = "StoriesPager \(UUID().uuidString)"
+    private let coordinateSpaceName: String = "StoriesPager \(UUID().uuidString)"
+    private var coordinateSpace: CoordinateSpace { .named(coordinateSpaceName) }
 
     public init(
         currentId: Binding<Model.Id>,
-        activeId: Binding<Model.Id?> = .constant(.none),
         models: [Model],
         viewConfig: ViewConfig,
         reactions: Reactions? = .none
     ) {
         self._currentId = currentId
-        self._activeId = activeId
         self.models = models
         self.viewConfig = viewConfig
         self.reactions = reactions
@@ -38,18 +36,13 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                 store[next.id] = viewConfig.storyViewBuilder(next)
             }
 
-        self._ls = .init(wrappedValue: .init(viewConfig: viewConfig))
+        self._ls = .init(wrappedValue: .init(viewConfig: viewConfig, reactions: reactions))
     }
 
     public var body: some View {
         content
-            .coordinateSpace(name: coordinateSpace)
+            .coordinateSpace(name: coordinateSpaceName)
             .animation(.linear, value: currentId)
-            .onReceive(ls.navigationPub) { self.reactions?.navigationSubject?.send($0) }
-            .onReceive(ls.activePageIdPub.removeDuplicates()) { self.activeId = $0 }
-            .onChange(of: currentId) { new in
-                print(">>> stories pager currentId change: to \(new)")
-            }
     }
 
     @ViewBuilder
@@ -57,7 +50,6 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         if #available(iOS 17.0, *) {
             scrollViewPageContent
                 .onReceive(ls.activePageIdPub.removeDuplicates()) { active in
-                    print(">>> stories pager activeId pub: \(active)")
                     guard let active, active != currentId else { return }
                     self.currentId = active
                 }
@@ -102,22 +94,22 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     @available(iOS 17, *)
     private var scrollviewPager: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 0) {
-                    ForEach(models) { model in
-                        pages[model.id]
-                            .frame(width: bounds.width)
-                            .containerRelativeFrame([.horizontal])
-                            .modifyWithCubeRotation
-                            .id(model.id)
-                    }
-                }.background {
-                    GeometryReader { gr in
-                        Color.clear
-                            .onChange(of: gr.frame(in: .named(coordinateSpace))) { rect in
-                                ls.onContentFrameChange(rect, bounds: self.bounds, models: self.models)
-                            }
-                    }
+            LazyHStack(spacing: 0) {
+                ForEach(models) { model in
+                    pages[model.id]
+                        .frame(width: bounds.width)
+                        .containerRelativeFrame([.horizontal])
+                        .modifyWithCubeRotation
+                        .id(model.id)
                 }
+            }.background {
+                GeometryReader { gr in
+                    Color.clear
+                        .onChange(of: gr.frame(in: coordinateSpace)) { rect in
+                            ls.onContentFrameChange(rect, bounds: self.bounds, models: self.models)
+                        }
+                }
+            }
         }
         .scrollTargetBehavior(.paging)
         .containerRelativeFrame(.horizontal, count: 1, spacing: 0)
@@ -128,11 +120,20 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         TabView(selection: $currentId) {
             ForEach(models) { model in
                 pageContent(model)
-                    .tag(model.id)
                     .modifier(viewConfig.switchStoryModifier)
-                    .frameOnChange(space: .named(coordinateSpace)) { rect in
-                        ls.trackPageRects(currentPageId: currentId, targetPageId: model.id, rect: rect)
+                    .background {
+                        GeometryReader { gr in
+                            Color.clear
+                                .onChange(of: gr.frame(in: coordinateSpace)) { rect in
+                                    ls.trackPageRects(currentPageId: currentId, targetPageId: model.id, rect: rect)
+                                }
+                                .onAppear {
+                                    let rect = gr.frame(in: coordinateSpace)
+                                    ls.trackPageRects(currentPageId: currentId, targetPageId: model.id, rect: rect)
+                                }
+                        }
                     }
+                    .tag(model.id)
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
