@@ -9,7 +9,7 @@ extension StoriesPager {
         private let viewConfig: StoriesPager.ViewConfig
         private let reactions: StoriesPager.Reactions?
         private var initialOffsetY: CGFloat?
-        private(set) var inAnimation: Bool = false
+        private(set) var inAnimation: Bool = true
 
         init(
             viewConfig: StoriesPager.ViewConfig,
@@ -51,6 +51,8 @@ extension StoriesPager {
         }
 
         func onContentFrameChange(_ rect: CGRect, bounds: CGRect, models: [Model]) {
+            if self.initialOffsetY == nil { self.initialOffsetY = rect.minY }
+
             guard inAnimation.not else { return }
 
             let progress = abs(rect.minX / bounds.width)
@@ -60,7 +62,11 @@ extension StoriesPager {
             guard let id = models[safe: progressIntPart]?.id
             else { return }
 
-            let activeModelId = progressFloatingPart == 0 ? id : nil
+            let yOffset = rect.minY - (self.initialOffsetY ?? 0)
+
+            let inTransition = progressFloatingPart != 0 || yOffset != 0
+
+            let activeModelId = inTransition ? nil : id
 
             activePageIdSub.send(activeModelId)
         }

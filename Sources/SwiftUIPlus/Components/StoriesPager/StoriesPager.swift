@@ -105,7 +105,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
             }.background {
                 GeometryReader { gr in
                     Color.clear
-                        .onChange(of: gr.frame(in: coordinateSpace)) { rect in
+                        .onChange(of: gr.frame(in: .global)) { rect in
                             ls.onContentFrameChange(rect, bounds: self.bounds, models: self.models)
                         }
                 }
@@ -119,7 +119,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     private var tabViewPagesContent: some View {
         TabView(selection: $currentId) {
             ForEach(models) { model in
-                pageContent(model)
+                tabViewPage(model)
                     .modifier(viewConfig.switchStoryModifier)
                     .background {
                         GeometryReader { gr in
@@ -139,7 +139,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         .tabViewStyle(.page(indexDisplayMode: .never))
     }
 
-    private func pageContent(_ model: Model) -> some View {
+    private func tabViewPage(_ model: Model) -> some View {
         Button(action: {}) {
             Group {
                 if #available(iOS 16.0, *) {
