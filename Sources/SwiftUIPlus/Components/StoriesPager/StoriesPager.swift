@@ -43,6 +43,10 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         content
             .coordinateSpace(name: coordinateSpaceName)
             .animation(.linear, value: currentId)
+            .overlay {
+
+                Text("ACTIVE ID \(reactions?.activeId.wrappedValue)")
+            }
     }
 
     @ViewBuilder
@@ -67,6 +71,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                         ls.delayForAnimation()
                         Task { @MainActor in
                             sr.scrollTo(currentId)
+                            ls.activePageIdSub.send(currentId)
                         }
                     }
                     .onChange(of: currentId) { id in
