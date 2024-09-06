@@ -76,6 +76,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                         }
                     }
                     .onTapGesture {
+                        guard ls.inAnimation.not else { return }
                         ls.delayForAnimation()
                         onTapContent(location: $0, activeId: currentId, triggeredId: currentId)
                     }
