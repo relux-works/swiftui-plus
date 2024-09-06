@@ -26,22 +26,26 @@ public struct CubeRotationModifier: ViewModifier {
     @State private var rect: CGRect = .zero
 
     public func body(content: Content) -> some View {
-        ZStack {
-            Color.clear
-                .storingSize(in: $rect, space: .global)
-            content
-                .rotation3DEffect(
-                    .init(degrees: self.calcAngle(rect: rect, rotationDegree: props.rotationDegree)),
-                    axis: (x: 0, y: 1, z: 0),
-                    anchor: rect.minX > 0 ? .leading : .trailing,
-                    perspective: props.perspective
-                )
-                .ignoresSafeArea(edges: props.ignoreSafeAreaEdges)
-        }
+        content
+            .rotation3DEffect(
+                .init(degrees: self.calcAngle(rect: rect, rotationDegree: props.rotationDegree)),
+                axis: (x: 0, y: 1, z: 0),
+                anchor: rect.minX > 0 ? .leading : .trailing,
+                perspective: props.perspective
+            )
+            .transaction { $0.animation = .none }
+            .ignoresSafeArea(edges: props.ignoreSafeAreaEdges)
+            .background {
+                GeometryReader { gr in
+                    Color.clear
+                        .ignoresSafeArea(edges: props.ignoreSafeAreaEdges)
+                        .onChange(of: gr.frame(in: .global)) { self.rect = $0 }
+                }
+            }
     }
 
     private func calcAngle(rect: CGRect, rotationDegree: CGFloat) -> Double {
-        let tempAngle = rect.minX / (0.5 * bounds.width)
+        let tempAngle = (rect.minX / (0.5 * bounds.width)).truncatingRemainder(dividingBy: 2)
         return tempAngle * rotationDegree
     }
 }

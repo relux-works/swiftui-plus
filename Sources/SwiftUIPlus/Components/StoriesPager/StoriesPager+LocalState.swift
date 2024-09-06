@@ -62,7 +62,7 @@ extension StoriesPager {
             guard let id = models[safe: progressIntPart]?.id
             else { return }
 
-            let yOffset = rect.minY - (self.initialOffsetY ?? 0)
+            let yOffset = 0  // let yOffset = rect.minY - (self.initialOffsetY ?? 0)
 
             let inTransition = progressFloatingPart != 0 || yOffset != 0
 
