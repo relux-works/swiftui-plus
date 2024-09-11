@@ -80,6 +80,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                         ls.delayForAnimation()
                         onTapContent(location: $0, activeId: currentId, triggeredId: currentId)
                     }
+                    .allowsHitTesting(ls.inAnimation.not)
             }
             .transaction{ $0.animation = .none }
         }
@@ -95,7 +96,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     @available(iOS 17, *)
     private var scrollviewPager: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 0) {
+            HStack(spacing: 0) {
                 ForEach(models) { model in
                     pages[model.id]
                         .frame(width: bounds.width)
