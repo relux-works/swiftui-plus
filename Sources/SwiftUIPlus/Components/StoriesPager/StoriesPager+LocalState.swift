@@ -9,7 +9,8 @@ extension StoriesPager {
         private let viewConfig: StoriesPager.ViewConfig
         private let reactions: StoriesPager.Reactions?
         private var initialOffsetY: CGFloat?
-        private(set) var inAnimation: Bool = true
+        @Published private(set) var inAnimation: Bool = true
+        private var disableInAnimationTask: Task<Void, any Error>?
 
         init(
             viewConfig: StoriesPager.ViewConfig,
@@ -23,7 +24,10 @@ extension StoriesPager {
 
         func delayForAnimation() {
             inAnimation = true
-            Task.delayed(byTimeInterval: 0.3) { @MainActor in self.inAnimation = false }
+            disableInAnimationTask?.cancel()
+            disableInAnimationTask = Task.delayed(byTimeInterval: 0.3) { @MainActor in
+                self.inAnimation = false
+            }
         }
 
         let activePageIdSub: PassthroughSubject<Model.Id?, Never> = .init()
