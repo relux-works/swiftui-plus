@@ -65,19 +65,22 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                 scrollviewPager
                     .onAppear {
                         ls.delayForAnimation()
-                        Task { @MainActor in
+                        Task.delayed(byTimeInterval: 0.1) { @MainActor in
+                            print(">>> stories: appear scroll to \(currentId)")
                             sr.scrollTo(currentId)
                         }
                     }
-                    .onChange(of: currentId) { id in
+                    .onChange(of: self.currentId) { id in
+                        guard ls.inAnimation.not else { return }
                         ls.delayForAnimation()
                         Task { @MainActor in
+                            print(">>> stories: onChange scroll to \(currentId)")
                             withAnimation(.linear) { sr.scrollTo(id) }
                         }
                     }
                     .onTapGesture {
+                        print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
                         guard ls.inAnimation.not else { return }
-                        ls.delayForAnimation()
                         onTapContent(location: $0, activeId: currentId, triggeredId: currentId)
                     }
                     .allowsHitTesting(ls.inAnimation.not)
@@ -96,7 +99,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     @available(iOS 17, *)
     private var scrollviewPager: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 0) {
+            LazyHStack(spacing: 0) {
                 ForEach(models) { model in
                     pages[model.id]
                         .frame(width: bounds.width)
