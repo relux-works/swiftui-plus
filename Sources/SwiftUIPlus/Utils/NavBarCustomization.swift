@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 public enum NavBarCustomization {
 
@@ -10,8 +11,12 @@ public enum NavBarCustomization {
 	) {
 		let appearance = UINavigationBarAppearance()
 		appearance.backgroundColor = backgroundColor
-		appearance.titleTextAttributes = [.foregroundColor: accentColor, .font: inlineTitleFont]
-		appearance.largeTitleTextAttributes = [.foregroundColor: accentColor, .font: largeTitleFont]
+
+		let scaledInlineTitleFont = UIFontMetrics.default.scaledFont(for: inlineTitleFont)
+		appearance.titleTextAttributes = [.foregroundColor: accentColor, .font: scaledInlineTitleFont]
+
+        let scaledLargeTitleFont = UIFontMetrics.default.scaledFont(for: largeTitleFont)
+		appearance.largeTitleTextAttributes = [.foregroundColor: accentColor, .font: scaledLargeTitleFont]
 
 		/* todo: CAUTION!
 			it changes button's text foreground color only without chevron
