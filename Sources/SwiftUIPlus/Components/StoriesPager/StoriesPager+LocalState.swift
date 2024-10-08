@@ -33,7 +33,7 @@ extension StoriesPager {
         let activePageIdSub: PassthroughSubject<Model.Id?, Never> = .init()
         var activePageIdPub: AnyPublisher<Model.Id?, Never> {
             activePageIdSub
-                .print(">>> active page sub: ")
+                .print(">>> stories ls: active page sub: ")
                 .debounce(
                     for: .init(floatLiteral: viewConfig.activePageDebounceDuration),
                     scheduler: DispatchQueue.main
@@ -45,7 +45,7 @@ extension StoriesPager {
         let navigationSub: PassthroughSubject<Reactions.NavigationType, Never> = .init()
         var navigationPub: AnyPublisher<StoriesPagerNavigationType, Never> {
             navigationSub
-                .print(">>> nav sub: ")
+                .print(">>> stories ls: nav sub: ")
                 .debounce(
                     for: .init(floatLiteral: viewConfig.navigationDebounceDuration),
                     scheduler: DispatchQueue.main

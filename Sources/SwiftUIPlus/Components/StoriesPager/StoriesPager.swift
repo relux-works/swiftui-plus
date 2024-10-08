@@ -43,6 +43,12 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         content
             .coordinateSpace(name: coordinateSpaceName)
             .animation(.linear, value: currentId)
+            .onReceive(ls.activePageIdPub.removeDuplicates()) { active in
+                switch active {
+                    case .none: self.reactions?.contentHeld?.wrappedValue = true
+                    case .some: self.reactions?.contentHeld?.wrappedValue = false
+                }
+            }
     }
 
     @ViewBuilder
