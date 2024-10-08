@@ -53,14 +53,19 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
 
     @ViewBuilder
     private var content: some View {
-        if #available(iOS 17.0, *) {
-            scrollViewPageContent
-                .onReceive(ls.activePageIdPub.removeDuplicates()) { active in
-                    guard let active, active != currentId else { return }
-                    self.currentId = active
+        switch self.models.isEmpty {
+            case true:
+                Spacer()
+            case false:
+                if #available(iOS 17.0, *) {
+                    scrollViewPageContent
+                        .onReceive(ls.activePageIdPub.removeDuplicates()) { active in
+                            guard let active, active != currentId else { return }
+                            self.currentId = active
+                        }
+                } else {
+                    tabViewPagesContent
                 }
-        } else {
-            tabViewPagesContent
         }
     }
 
