@@ -14,7 +14,7 @@ public struct PressHandleButtonStyle: ButtonStyle {
         configuration.label
             .opacity(configuration.isPressed ? props.pressConfig.opacity : 1.0)
             .scaleEffect(configuration.isPressed ? props.pressConfig.scale : 1.0)
-            .animation(.easeInOut)
+            .animation(.easeInOut, value: configuration.isPressed)
             .onChange(of: configuration.isPressed, perform: reactOnPressState)
     }
 

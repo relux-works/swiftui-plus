@@ -71,40 +71,43 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
 
     @available(iOS 17, *)
     private var scrollViewPageContent: some View {
-        Button(action: {}) {
-            ScrollViewReader { sr in
-                scrollviewPager
-                    .onAppear {
-                        ls.delayForAnimation()
-                        Task.delayed(byTimeInterval: 0.1) { @MainActor in
-                            print(">>> stories: appear scroll to \(currentId)")
-                            sr.scrollTo(currentId)
-                        }
+        ScrollViewReader { sr in
+            scrollviewPager
+                .onAppear {
+                    ls.delayForAnimation()
+                    Task.delayed(byTimeInterval: 0.1) { @MainActor in
+                        print(">>> stories: appear scroll to \(currentId)")
+                        sr.scrollTo(currentId)
                     }
-                    .onChange(of: self.currentId) { id in
-                        guard ls.inAnimation.not else { return }
-                        ls.delayForAnimation()
-                        Task { @MainActor in
-                            print(">>> stories: onChange scroll to \(currentId)")
-                            withAnimation(.linear) { sr.scrollTo(id) }
-                        }
+                }
+                .onChange(of: self.currentId) { id in
+                    guard ls.inAnimation.not else { return }
+                    ls.delayForAnimation()
+                    Task { @MainActor in
+                        print(">>> stories: onChange scroll to \(currentId)")
+                        withAnimation(.linear) { sr.scrollTo(id) }
                     }
-                    .onTapGesture {
-                        print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
-                        guard ls.inAnimation.not else { return }
-                        onTapContent(location: $0, activeId: currentId, triggeredId: currentId)
-                    }
-                    .allowsHitTesting(ls.inAnimation.not)
-            }
-            .transaction{ $0.animation = .none }
+                }
+                .onTapGesture {
+                    guard ls.inAnimation.not,
+                          self.reactions?.contentHeld?.wrappedValue == false
+                    else { return }
+
+                    print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
+                    onTapContent(location: $0, activeId: currentId, triggeredId: currentId)
+                }
+                .onLongPressGesture(minimumDuration: self.viewConfig.contentOnHoldMinDuration) {
+                    print(">>> stories: onTapGesture pressing state \(true)")
+                    self.reactions?.contentHeld?.wrappedValue = true
+                } onPressingChanged: { flag in
+                    guard flag.not else { return }
+                    self.reactions?.contentHeld?.wrappedValue = false
+                    print(">>> stories: onTapGesture pressing state \(false)")
+                }
+
+                .allowsHitTesting(ls.inAnimation.not)
         }
-        .buttonStyle(
-            PressHandleButtonStyle(props: .init(
-                pressed: reactions?.contentHeld ?? .constant(false),
-                pressConfig: viewConfig.contentOnHoldConfig,
-                minDuration: viewConfig.contentOnHoldMinDuration
-            ))
-        )
+        .transaction{ $0.animation = .none }
     }
 
     @available(iOS 17, *)
