@@ -69,45 +69,55 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         }
     }
 
+    @State private var tapDate: Date? = .none
+
     @available(iOS 17, *)
+    @ViewBuilder
     private var scrollViewPageContent: some View {
-        ScrollViewReader { sr in
-            scrollviewPager
-                .onAppear {
-                    ls.delayForAnimation()
-                    Task.delayed(byTimeInterval: 0.1) { @MainActor in
-                        print(">>> stories: appear scroll to \(currentId)")
-                        sr.scrollTo(currentId)
+            ScrollViewReader { sr in
+                scrollviewPager
+                    .onAppear {
+                        ls.delayForAnimation()
+                        Task.delayed(byTimeInterval: 0.1) { @MainActor in
+                            print(">>> stories: appear scroll to \(currentId)")
+                            sr.scrollTo(currentId)
+                        }
                     }
-                }
-                .onChange(of: self.currentId) { id in
-                    guard ls.inAnimation.not else { return }
-                    ls.delayForAnimation()
-                    Task { @MainActor in
-                        print(">>> stories: onChange scroll to \(currentId)")
-                        withAnimation(.linear) { sr.scrollTo(id) }
+                    .onChange(of: self.currentId) { id in
+                        guard ls.inAnimation.not else { return }
+                        ls.delayForAnimation()
+                        Task { @MainActor in
+                            print(">>> stories: onChange scroll to \(currentId)")
+                            withAnimation(.linear) { sr.scrollTo(id) }
+                        }
                     }
-                }
-                .onTapGesture {
-                    guard ls.inAnimation.not,
-                          self.reactions?.contentHeld?.wrappedValue == false
-                    else { return }
+            }
+            .allowsHitTesting(ls.inAnimation.not)
+            .transaction{ $0.animation = .none }
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { ctx in
+                        if tapDate == .none {
+                            self.tapDate = .now
+                        }
+                        if self.reactions?.contentHeld?.wrappedValue != true {
+                            self.reactions?.contentHeld?.wrappedValue = true
+                        }
+                    }
+                    .onEnded { ctx in
+                        let localTapDate = self.tapDate
+                        self.tapDate = .none
+                        self.reactions?.contentHeld?.wrappedValue = false
 
-                    print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
-                    onTapContent(location: $0, activeId: currentId, triggeredId: currentId)
-                }
-                .onLongPressGesture(minimumDuration: self.viewConfig.contentOnHoldMinDuration) {
-                    print(">>> stories: onTapGesture pressing state \(true)")
-                    self.reactions?.contentHeld?.wrappedValue = true
-                } onPressingChanged: { flag in
-                    guard flag.not else { return }
-                    self.reactions?.contentHeld?.wrappedValue = false
-                    print(">>> stories: onTapGesture pressing state \(false)")
-                }
+                        print(">>> stories: tapdate interval \(Date.now.timeIntervalSince(localTapDate!))")
+                        guard ls.inAnimation.not,
+                              let localTapDate, Date.now.timeIntervalSince(localTapDate) < self.viewConfig.contentOnHoldMinDuration
+                        else { return }
 
-                .allowsHitTesting(ls.inAnimation.not)
-        }
-        .transaction{ $0.animation = .none }
+                        print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
+                        onTapContent(location: ctx.location, activeId: currentId, triggeredId: currentId)
+                    }
+            )
     }
 
     @available(iOS 17, *)
