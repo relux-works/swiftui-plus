@@ -74,24 +74,24 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     @available(iOS 17, *)
     @ViewBuilder
     private var scrollViewPageContent: some View {
-            ScrollViewReader { sr in
-                scrollviewPager
-                    .onAppear {
-                        ls.delayForAnimation()
-                        Task.delayed(byTimeInterval: 0.1) { @MainActor in
-                            print(">>> stories: appear scroll to \(currentId)")
-                            sr.scrollTo(currentId)
-                        }
+        ScrollViewReader { sr in
+            scrollviewPager
+                .onAppear {
+                    ls.delayForAnimation()
+                    Task.delayed(byTimeInterval: 0.1) { @MainActor in
+                        print(">>> stories: appear scroll to \(currentId)")
+                        sr.scrollTo(currentId)
                     }
-                    .onChange(of: self.currentId) { id in
-                        guard ls.inAnimation.not else { return }
-                        ls.delayForAnimation()
-                        Task { @MainActor in
-                            print(">>> stories: onChange scroll to \(currentId)")
-                            withAnimation(.linear) { sr.scrollTo(id) }
-                        }
+                }
+                .onChange(of: self.currentId) { id in
+                    guard ls.inAnimation.not else { return }
+                    ls.delayForAnimation()
+                    Task { @MainActor in
+                        print(">>> stories: onChange scroll to \(currentId)")
+                        withAnimation(.linear) { sr.scrollTo(id) }
                     }
-            }
+                }
+        }
             .allowsHitTesting(ls.inAnimation.not)
             .transaction{ $0.animation = .none }
             .simultaneousGesture(
@@ -106,12 +106,15 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                     }
                     .onEnded { ctx in
                         let localTapDate = self.tapDate
+                        let currentDate = Date.now
+
                         self.tapDate = .none
                         self.reactions?.contentHeld?.wrappedValue = false
 
-                        print(">>> stories: tapdate interval \(Date.now.timeIntervalSince(localTapDate!))")
+                        print(">>> stories: tapdate interval \(currentDate.timeIntervalSince(localTapDate!)),  translation: \(ctx.translation)")
                         guard ls.inAnimation.not,
-                              let localTapDate, Date.now.timeIntervalSince(localTapDate) < self.viewConfig.contentOnHoldMinDuration
+                              ctx.translation.distance < 25,
+                              let localTapDate, currentDate.timeIntervalSince(localTapDate) < self.viewConfig.contentOnHoldMinDuration
                         else { return }
 
                         print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")

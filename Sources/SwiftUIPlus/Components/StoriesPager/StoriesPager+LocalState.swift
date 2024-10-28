@@ -99,10 +99,3 @@ extension StoriesPager {
         }
     }
 }
-
-fileprivate 
-extension CGPoint {
-    var distance: CGFloat {
-        sqrt(pow(self.x, 2) + pow(self.y, 2))
-    }
-}

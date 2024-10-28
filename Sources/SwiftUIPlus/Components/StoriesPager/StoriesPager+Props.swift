@@ -52,7 +52,7 @@ extension StoriesPager {
             switchStoryModifier: SwitchModifier = CubeRotationModifier(),
             backToForwardNavigationAreaRatio: CGFloat = 0.4,
             contentOnHoldConfig: (opacity: CGFloat, scale: CGFloat) = (opacity: 1, scale: 1),
-            contentOnHoldMinDuration: TimeInterval = 1,
+            contentOnHoldMinDuration: TimeInterval = 0.4,
             navigationDebounceDuration: TimeInterval = 0.2,
             activePageDebounceDuration: TimeInterval = 0.1
         ) {
