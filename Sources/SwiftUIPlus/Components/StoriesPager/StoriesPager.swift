@@ -58,7 +58,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                 Spacer()
             case false:
                 if #available(iOS 17.0, *) {
-                    scrollViewPageContent
+                    scrollView
                         .onReceive(ls.activePageIdPub.removeDuplicates()) { active in
                             guard let active, active != currentId else { return }
                             self.currentId = active
@@ -70,6 +70,58 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     }
 
     @State private var tapDate: Date? = .none
+
+    @available(iOS 17, *)
+    @ViewBuilder
+    private var scrollView: some View {
+        if #available(iOS 18.0, *) {
+            scrollViewPageContent
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { ctx in
+                            if tapDate == .none {
+                                self.tapDate = .now
+                            }
+                            if self.reactions?.contentHeld?.wrappedValue != true {
+                                self.reactions?.contentHeld?.wrappedValue = true
+                            }
+                        }
+                        .onEnded { ctx in
+                            let localTapDate = self.tapDate
+                            let currentDate = Date.now
+
+                            self.tapDate = .none
+                            self.reactions?.contentHeld?.wrappedValue = false
+
+                            print(">>> stories: tapdate interval \(currentDate.timeIntervalSince(localTapDate!)),  translation: \(ctx.translation)")
+                            guard ls.inAnimation.not,
+                                  ctx.translation.distance < 25,
+                                  let localTapDate, currentDate.timeIntervalSince(localTapDate) < self.viewConfig.contentOnHoldMinDuration
+                            else { return }
+
+                            print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
+                            onTapContent(location: ctx.location, activeId: currentId, triggeredId: currentId)
+                        }
+                )
+        }
+        else {
+            Button(action: {}) {
+                scrollViewPageContent
+                    .onTapGesture {
+                        print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
+                        guard ls.inAnimation.not else { return }
+                        onTapContent(location: $0, activeId: currentId, triggeredId: currentId)
+                    }
+            }
+            .buttonStyle(
+                PressHandleButtonStyle(props: .init(
+                    pressed: reactions?.contentHeld ?? .constant(false),
+                    pressConfig: viewConfig.contentOnHoldConfig,
+                    minDuration: viewConfig.contentOnHoldMinDuration
+                ))
+            )
+        }
+    }
 
     @available(iOS 17, *)
     @ViewBuilder
@@ -94,33 +146,6 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
         }
             .allowsHitTesting(ls.inAnimation.not)
             .transaction{ $0.animation = .none }
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { ctx in
-                        if tapDate == .none {
-                            self.tapDate = .now
-                        }
-                        if self.reactions?.contentHeld?.wrappedValue != true {
-                            self.reactions?.contentHeld?.wrappedValue = true
-                        }
-                    }
-                    .onEnded { ctx in
-                        let localTapDate = self.tapDate
-                        let currentDate = Date.now
-
-                        self.tapDate = .none
-                        self.reactions?.contentHeld?.wrappedValue = false
-
-                        print(">>> stories: tapdate interval \(currentDate.timeIntervalSince(localTapDate!)),  translation: \(ctx.translation)")
-                        guard ls.inAnimation.not,
-                              ctx.translation.distance < 25,
-                              let localTapDate, currentDate.timeIntervalSince(localTapDate) < self.viewConfig.contentOnHoldMinDuration
-                        else { return }
-
-                        print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
-                        onTapContent(location: ctx.location, activeId: currentId, triggeredId: currentId)
-                    }
-            )
     }
 
     @available(iOS 17, *)
