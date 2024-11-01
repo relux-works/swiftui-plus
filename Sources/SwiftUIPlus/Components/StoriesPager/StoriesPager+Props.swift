@@ -44,6 +44,7 @@ extension StoriesPager {
         let backToForwardAreaRatio: CGFloat
         let contentOnHoldConfig: (opacity: CGFloat, scale: CGFloat)
         let contentOnHoldMinDuration: TimeInterval
+        let contentTapThresholdDuration: TimeInterval
         let navigationDebounceDuration: TimeInterval
         let activePageDebounceDuration: TimeInterval
 
@@ -52,7 +53,8 @@ extension StoriesPager {
             switchStoryModifier: SwitchModifier = CubeRotationModifier(),
             backToForwardNavigationAreaRatio: CGFloat = 0.4,
             contentOnHoldConfig: (opacity: CGFloat, scale: CGFloat) = (opacity: 1, scale: 1),
-            contentOnHoldMinDuration: TimeInterval = 0.4,
+            contentOnHoldMinDuration: TimeInterval = 0.1, // actual for ios <18
+            contentTapThresholdDuration: TimeInterval = 0.4, // actual for ios >=18
             navigationDebounceDuration: TimeInterval = 0.2,
             activePageDebounceDuration: TimeInterval = 0.1
         ) {
@@ -61,6 +63,7 @@ extension StoriesPager {
             self.backToForwardAreaRatio = backToForwardNavigationAreaRatio
             self.contentOnHoldConfig = contentOnHoldConfig
             self.contentOnHoldMinDuration = contentOnHoldMinDuration
+            self.contentTapThresholdDuration = contentTapThresholdDuration
             self.navigationDebounceDuration = navigationDebounceDuration
             self.activePageDebounceDuration = activePageDebounceDuration
         }

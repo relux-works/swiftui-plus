@@ -96,7 +96,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                             print(">>> stories: tapdate interval \(currentDate.timeIntervalSince(localTapDate!)),  translation: \(ctx.translation)")
                             guard ls.inAnimation.not,
                                   ctx.translation.distance < 25,
-                                  let localTapDate, currentDate.timeIntervalSince(localTapDate) < self.viewConfig.contentOnHoldMinDuration
+                                  let localTapDate, currentDate.timeIntervalSince(localTapDate) < self.viewConfig.contentTapThresholdDuration
                             else { return }
 
                             print(">>> stories: onTapGesture \(currentId) inAnimation: \(ls.inAnimation)")
