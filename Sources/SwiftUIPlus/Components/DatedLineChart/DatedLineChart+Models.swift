@@ -1,7 +1,7 @@
 import Foundation
 
 public extension DatedLineChart {
-    struct Point {
+    struct Point: Sendable {
         public let value: Double
         public let timestamp: Date
 
@@ -11,12 +11,12 @@ public extension DatedLineChart {
         }
     }
 
-    enum Style {
+    enum Style: Sendable {
         case line
         case curved
     }
 
-    enum DatePeriod {
+    enum DatePeriod: Sendable {
         case weekDays
         case monthDays
         case months

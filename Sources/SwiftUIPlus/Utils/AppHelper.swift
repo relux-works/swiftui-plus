@@ -12,6 +12,10 @@ public extension AppHelper {
         guard let url = URL(string: url) else {
             return
         }
+        self.openUrl(url: url)
+    }
+
+    static func openUrl(url: URL) {
         guard UIApplication.shared.canOpenURL(url) else {
             return
         }

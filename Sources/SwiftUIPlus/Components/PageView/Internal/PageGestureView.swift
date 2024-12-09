@@ -34,7 +34,7 @@ extension PageGestureView {
 	
 }
 
-extension Binding: Equatable where Value == Optional<Int> {
+extension Binding: @retroactive Equatable where Value == Optional<Int> {
 	public static func == (lhs: Binding<Value>, rhs: Binding<Value>) -> Bool {
 		return lhs.wrappedValue == rhs.wrappedValue
 	}
@@ -144,9 +144,9 @@ internal struct PageGestureView<Content>: View where Content : View {
 		guard pageState.viewCount > 1
 		else { return 0...0 }
 		
-		var lowerBound = -(CGFloat(pageState.viewCount - 1) * (pageLength + spacing))
-		var upperBound: CGFloat = 0
-		
+		let lowerBound = -(CGFloat(pageState.viewCount - 1) * (pageLength + spacing))
+		let upperBound: CGFloat = 0
+
 		
 		// ❗️ strictPageAlignment is not propagated from environment
 		// this does not work as expected
