@@ -19,6 +19,7 @@ Carthage/Build
 # fastlane
 # https://docs.fastlane.tools/best-practices/source-control/#source-control
 
+DerivedData
 .build
 .swiftpm
 .idea

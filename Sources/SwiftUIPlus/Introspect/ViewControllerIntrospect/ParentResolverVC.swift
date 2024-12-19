@@ -49,10 +49,12 @@ public final class ParentResolverViewController: UIViewController {
         }
     }
 
+
     override public func didMove(toParent parent: UIViewController?) {
         super.didMove(toParent: parent)
-        Task {@MainActor [weak self] in
-            guard let self else { return }
+
+        Task {@MainActor [weak self, weak parent] in
+            guard let self, let parent else { return }
             guard  let parent = self.parent else { return }
             await self.onResolve?(parent)
         }

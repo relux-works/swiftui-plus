@@ -29,6 +29,7 @@ public struct ControllerResolveObserver: ViewModifier {
     private func onResolveController(_ c: UIViewController) async {
         let controllerId = ObjectIdentifier(c)
         guard self.controllerId != controllerId else { return }
+        self.controllerId = controllerId
         await onResolve(c)
     }
 }
