@@ -1,14 +1,14 @@
 import Foundation
 
 extension Text {
-    struct Segment {
+    public struct Segment {
         let label: String
         let font: Font?
         let foregroundColor: Color?
         let underlined: Bool
         let link: URL?
 
-        init(
+        public init(
             label: String,
             font: Font? = nil,
             foregroundColor: Color? = nil,
