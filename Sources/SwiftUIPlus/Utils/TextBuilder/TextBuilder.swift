@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension Text {
-    static func build(_ segments: Segment..., separator: Segment? = nil) -> Text {
+    static public func build(_ segments: Segment..., separator: Segment? = nil) -> Text {
         let result = segments.indices.reduce(AttributedString()) { partialResult, index in
             var accumulated = partialResult
             accumulated += renderSegment(segments[index])
