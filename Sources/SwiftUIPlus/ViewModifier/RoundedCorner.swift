@@ -16,6 +16,14 @@ public struct RoundedCorner: Shape {
 }
 
 public extension View {
+    @ViewBuilder
+    func cornerRadius(_ radius: CGFloat?, corners: UIRectCorner) -> some View {
+        switch radius {
+            case .none: self
+            case let .some(radius): self.cornerRadius(radius, corners: corners)
+        }
+    }
+
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape( RoundedCorner(radius: radius, corners: corners) )
     }

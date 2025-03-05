@@ -21,8 +21,8 @@ public struct BottomSheetModifier: ViewModifier {
 
     public func body(content : Content) -> some View {
         content
+            .cornerRadius(cornerRadius, corners: [.topLeft, .topRight])
             .onVCResolve { vc in
-                var current: UIViewController? = vc
                 if let bgColor {
                     vc.view.backgroundColor = UIColor(bgColor)
                 }
