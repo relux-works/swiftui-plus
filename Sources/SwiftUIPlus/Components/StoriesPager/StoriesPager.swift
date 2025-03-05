@@ -19,6 +19,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
     private let reactions: Reactions?
     private let coordinateSpaceName: String = "StoriesPager \(UUID().uuidString)"
     private var coordinateSpace: CoordinateSpace { .named(coordinateSpaceName) }
+    @Environment(\.scenePhase) private var scenePhase
 
     public init(
         currentId: Binding<Model.Id>,
@@ -48,6 +49,10 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
                     case .none: self.reactions?.contentHeld?.wrappedValue = true
                     case .some: self.reactions?.contentHeld?.wrappedValue = false
                 }
+            }
+            .onChange(of: scenePhase) { phase in
+                guard phase == .active else { return }
+                self.reactions?.contentHeld?.wrappedValue = false
             }
     }
 
