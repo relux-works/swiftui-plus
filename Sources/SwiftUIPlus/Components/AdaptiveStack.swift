@@ -82,6 +82,7 @@ public extension AdaptiveStack {
       case regularAccessible
     }
 
+    nonisolated
     static private func handler(_ condition: Condition) -> ConditionHandler {
       switch condition {
       case .compact: return compact
@@ -93,32 +94,39 @@ public extension AdaptiveStack {
       case .regularAccessible: return regularAccessible
       }
     }
-    
+
+    nonisolated
     static private func compact(horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize) -> Bool {
       horizontalSizeClass == .compact
     }
 
+    nonisolated
     static private func regular(horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize) -> Bool {
       horizontalSizeClass == .regular
     }
 
+    nonisolated
     static private func accessible(horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize) -> Bool {
       dynamicTypeSize.isAccessibilitySize
     }
-    
+
+    nonisolated
     static private func accessibleLarger2(horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize) -> Bool {
         DynamicTypeSize.largerAccessibility2Sizes.contains(dynamicTypeSize)
     }
-    
+
+    nonisolated
     static private func accessibleLarger4(horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize) -> Bool {
         DynamicTypeSize.largerAccessibility2Sizes.contains(dynamicTypeSize)
     }
 
+    nonisolated
     static private func compactAccessible(horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize) -> Bool {
       horizontalSizeClass == .compact &&
       dynamicTypeSize.isAccessibilitySize
     }
 
+    nonisolated
     static private func regularAccessible(horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize) -> Bool {
       horizontalSizeClass == .regular &&
       dynamicTypeSize.isAccessibilitySize

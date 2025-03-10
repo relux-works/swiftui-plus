@@ -8,6 +8,7 @@ public struct AppHelper {
 
 // open url
 public extension AppHelper {
+    @MainActor
     static func openUrl(url: String) {
         guard let url = URL(string: url) else {
             return
@@ -15,6 +16,7 @@ public extension AppHelper {
         self.openUrl(url: url)
     }
 
+    @MainActor
     static func openUrl(url: URL) {
         guard UIApplication.shared.canOpenURL(url) else {
             return
@@ -22,6 +24,7 @@ public extension AppHelper {
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 
+    @MainActor
     static func openAppSettings() {
         openUrl(url: UIApplication.openSettingsURLString)
     }
@@ -29,6 +32,7 @@ public extension AppHelper {
 
 // send email
 public extension AppHelper {
+    @MainActor
      static func sendEmail(email: String, subject: String = "", bodyText: String = "", onEmailClientUnavailable: () -> Void = {}) {
         guard let coded = "mailto:\(email)?subject=\(subject)&body=\(bodyText)"
             .addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed)
@@ -55,10 +59,12 @@ public extension AppHelper {
 
 // share activity sheet
 public extension AppHelper {
+    @MainActor
     static func openShareSheet(activityItems: [MyActivityItemSource], onComplete: (()->())? = nil) {
         self.openShareSheet(items: activityItems, onComplete: onComplete)
     }
 
+    @MainActor
     static func openShareSheet(items: [Any], onComplete: (()->())? = nil) {
         let activityView = UIActivityViewController(activityItems: items, applicationActivities: nil)
         let allScenes = UIApplication.shared.connectedScenes
@@ -120,6 +126,7 @@ public extension AppHelper {
 
 // rate us request
 public extension AppHelper {
+    @MainActor
     static func rateAppRequest() {
         guard let currentScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
             print("UNABLE TO GET CURRENT SCENE")
@@ -131,6 +138,7 @@ public extension AppHelper {
 
 // notification badges
 public extension AppHelper {
+    @MainActor
     static func removeBadgesForApp() {
         UIApplication.shared.applicationIconBadgeNumber = 0
     }

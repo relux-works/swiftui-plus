@@ -41,6 +41,7 @@ public struct SwipeGestureProxy: UIViewRepresentable {
 
     }
 
+    @MainActor
     public class Coordinator: NSObject{
 			
         var parent : SwipeGestureProxy

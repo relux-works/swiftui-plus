@@ -5,7 +5,7 @@
 */
 
 /// An alignment position along the horizontal axis.
-public enum HorizontalPageAlignment: CaseIterable, Hashable {
+public enum HorizontalPageAlignment: CaseIterable, Hashable, Sendable {
     
     /// A guide marking the leading edge of the page.
     case leading

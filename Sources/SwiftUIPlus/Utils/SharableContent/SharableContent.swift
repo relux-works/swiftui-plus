@@ -1,4 +1,4 @@
-public protocol SharableView {
+public protocol SharableView: Sendable {
     var previewView: any View {get}
     var contentView: any View {get}
 }

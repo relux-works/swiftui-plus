@@ -7,7 +7,7 @@ public extension PDFKitView {
         case local(data: Data, config: Config = .defaultValue)
     }
 
-    public struct Config {
+    struct Config: Sendable {
         let bgColor: UIColor
         let minScaleFactor: CGFloat?
         let maxScaleFactor: CGFloat?

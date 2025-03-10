@@ -17,8 +17,10 @@ extension CubeRotationModifier {
     }
 }
 
+extension CubeRotationModifier.Props: Sendable { }
+
 extension CubeRotationModifier.Props {
-    public static let defaultValue: Self = .init(
+    public nonisolated static let defaultValue: Self = .init(
         perspective: 2.5,
         rotationDegree: 25.0,
         ignoreSafeAreaEdges: .all

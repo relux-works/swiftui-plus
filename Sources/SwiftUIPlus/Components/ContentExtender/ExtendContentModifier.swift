@@ -12,6 +12,8 @@ public struct ExtendContentAxis: OptionSet {
     public var rawValue: Int8
 }
 
+extension ExtendContentAxis: Sendable { }
+
 public extension View {
     func extendingContent(_ edges: ExtendContentAxis = .all) -> some View {
         VStack(spacing: 0) {

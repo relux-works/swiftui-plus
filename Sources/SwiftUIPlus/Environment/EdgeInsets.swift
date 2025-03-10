@@ -1,6 +1,7 @@
 import SwiftUI
 
-public struct SafeAreaEdgeInsetsKey: EnvironmentKey {
+public struct SafeAreaEdgeInsetsKey: @preconcurrency EnvironmentKey {
+    @MainActor
     public static var defaultValue: EdgeInsets {
         UIApplication.shared.windows
             .first { $0.isKeyWindow }?
