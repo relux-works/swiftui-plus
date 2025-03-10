@@ -9,7 +9,9 @@ import SwiftUI
 /// An alignment in both axes.
 public struct PageAlignment<HAlignment, VAlignment>: Equatable
 where HAlignment : Equatable,
-      VAlignment : Equatable
+      VAlignment : Equatable,
+      HAlignment : Sendable,
+      VAlignment : Sendable
 {
     
     /// The alignment on the horizontal axis.
@@ -22,6 +24,8 @@ where HAlignment : Equatable,
         fatalError("PageAlignment cannot be initialized using private init().")
     }
 }
+
+extension PageAlignment: Sendable { }
 
 
 public extension PageAlignment

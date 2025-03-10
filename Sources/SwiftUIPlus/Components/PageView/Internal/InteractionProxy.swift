@@ -6,9 +6,9 @@
 
 import SwiftUI
 
-internal struct InteractionProxy: Equatable {
+internal struct InteractionProxy: Equatable, Sendable {
     let id: UUID
-    let moveTo: (CGFloat) -> Void
+    let moveTo: @MainActor @Sendable (CGFloat) -> Void
     
     static func == (lhs: InteractionProxy, rhs: InteractionProxy) -> Bool {
         lhs.id == rhs.id

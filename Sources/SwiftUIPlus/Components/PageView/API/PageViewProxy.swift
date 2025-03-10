@@ -8,6 +8,7 @@ import SwiftUI
 
 /// A proxy value that supports programmatic paging of the first
 /// page view within a view hierarchy.
+@MainActor
 public struct PageViewProxy {
     
     /// Scans the first page view contained by the proxy for the

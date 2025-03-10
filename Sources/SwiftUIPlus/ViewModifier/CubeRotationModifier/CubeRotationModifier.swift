@@ -17,7 +17,7 @@ public struct CubeRotationModifier: ViewModifier {
     @Environment(\.bounds) private var bounds
     private let props: Props
 
-    public init(
+    public nonisolated init(
         props: Props = .defaultValue
     ) {
         self.props = props

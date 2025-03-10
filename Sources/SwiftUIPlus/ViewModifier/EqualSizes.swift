@@ -36,14 +36,16 @@ public struct EqualSizes: ViewModifier {
         content
             .onPreferenceChange(SizeKey.self, perform: { sizes in
                 guard sizes.count > 0 else { return }
-                switch handleSize {
-                case .width:
-                    self.maxWidth = sizes.map { $0.width }.max()
-                case .height:
-                    self.maxHeight = sizes.map { $0.height }.max()
-                case .all:
-                    self.maxWidth = sizes.map { $0.width }.max()
-                    self.maxHeight = sizes.map { $0.height }.max()
+                Task { @MainActor in
+                    switch handleSize {
+                        case .width:
+                            self.maxWidth = sizes.map { $0.width }.max()
+                        case .height:
+                            self.maxHeight = sizes.map { $0.height }.max()
+                        case .all:
+                            self.maxWidth = sizes.map { $0.width }.max()
+                            self.maxHeight = sizes.map { $0.height }.max()
+                    }
                 }
             })
             .environment(\.size, (width: maxWidth, height: maxHeight))

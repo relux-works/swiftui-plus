@@ -5,7 +5,7 @@
 */
 
 /// An alignment position along the vertical axis.
-public enum VerticalPageAlignment: CaseIterable, Hashable {
+public enum VerticalPageAlignment: CaseIterable, Hashable, Sendable {
     
     /// A guide marking the top edge of the page.
     case top

@@ -1,8 +1,10 @@
 import SwiftUI
 
 public struct PreventDisaplySleepKey: EnvironmentKey {
-    public static let defaultValue: (Bool)->() = { toggle in
-        UIApplication.shared.isIdleTimerDisabled = toggle
+    public static let defaultValue: @Sendable (Bool)->() = { toggle in
+        Task { @MainActor in
+            UIApplication.shared.isIdleTimerDisabled = toggle
+        }
     }
 }
 

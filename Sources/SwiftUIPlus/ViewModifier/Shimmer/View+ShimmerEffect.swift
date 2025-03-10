@@ -119,6 +119,8 @@ public extension ShimmerEffect {
     }
 }
 
+extension ShimmerEffect.Configuration: Sendable { }
+
 public extension ShimmerEffect.Configuration {
     static let `default` = Self(
         tint: .gray.opacity(0.3),

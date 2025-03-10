@@ -23,7 +23,11 @@ where Content : View
     
     public var body: some View {
         content(proxy)
-            .onPreferenceChange(InteractionProxyKey.self) { proxy.interactionProxy = $0 }
+            .onPreferenceChange(InteractionProxyKey.self) { value in
+                Task { @MainActor in
+                    proxy.interactionProxy = value
+                }
+            }
             .transformPreference(InteractionProxyKey.self) { $0 = InteractionProxyKey.defaultValue }
     }
     

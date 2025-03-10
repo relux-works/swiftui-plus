@@ -1,6 +1,7 @@
 import SwiftUI
 
-public struct MainScreenBoundsKey: EnvironmentKey {
+public struct MainScreenBoundsKey: @preconcurrency EnvironmentKey {
+    @MainActor
     public static var defaultValue: CGRect = UIScreen.main.bounds
 }
 

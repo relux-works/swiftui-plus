@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 public enum NavBarCustomization {
-
+    @MainActor
 	public static func customiseNavBar(
 		accentColor: UIColor,
 		backgroundColor: UIColor,

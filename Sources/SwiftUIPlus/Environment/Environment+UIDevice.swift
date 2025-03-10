@@ -1,7 +1,8 @@
 import SwiftUI
 
-struct Device: EnvironmentKey {
-   static var defaultValue: UIDevice = UIDevice.current
+struct Device: @preconcurrency EnvironmentKey {
+    @MainActor
+    static var defaultValue: UIDevice = UIDevice.current
 }
 
 public extension EnvironmentValues {
