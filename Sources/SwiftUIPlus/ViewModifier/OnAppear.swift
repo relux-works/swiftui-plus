@@ -22,9 +22,9 @@ public extension View {
     ///
     /// - Returns: A view that triggers `action` when this view appears.
     func onAppear(
-        action: @escaping () -> Void,
-        queue: @escaping () -> DispatchQueue = { .main },
-        delay: Double = 0
+        action: @Sendable @escaping () -> Void,
+        queue: @Sendable @escaping () -> DispatchQueue = { .main },
+        delay: Double
     ) -> some View {
         self
             .onAppear(
