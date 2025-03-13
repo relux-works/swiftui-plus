@@ -3,7 +3,7 @@ import Foundation
 import SwiftUI
 
 @propertyWrapper
-public struct StoredState<Value: Codable>: DynamicProperty {
+public struct StoredState<Value: Codable & Sendable>: DynamicProperty, Sendable {
     public let defaultValue: Value
     private let decoder: JSONDecoder = .init()
     private let encoder: JSONEncoder = .init()
@@ -34,7 +34,7 @@ public struct StoredState<Value: Codable>: DynamicProperty {
     public var wrappedValue: Value {
         get {
             guard let decoded = try? self.decoder.decode(Value.self, from: data)
-            else { print("failed to decode \(String(data: self.data, encoding: .utf8))"); return defaultValue; }
+            else { print("failed to decode \(String(data: self.data, encoding: .utf8) ?? "Not A Data")"); return defaultValue; }
             return decoded
         }
 
