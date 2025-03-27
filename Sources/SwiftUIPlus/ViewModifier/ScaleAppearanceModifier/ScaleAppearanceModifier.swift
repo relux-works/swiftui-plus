@@ -42,7 +42,7 @@ struct ScaleAppearanceModifier: ViewModifier {
     }
 
     private func frameSize(for shown: Bool) -> CGSize? {
-        return switch shown {
+        switch shown {
             case true: .none
             case false: .zero
         }
