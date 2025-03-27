@@ -31,15 +31,20 @@ struct ScaleAppearanceModifier: ViewModifier {
             .overlay(alignment: anchor) { content }
             .clipped()
             .animation(animation, value: shown)
+            .onAppear { self.frameSize = frameSize(for: shown) }
             .onChange(of: shown, perform: handleAppearanceForFrame)
     }
 
     private func handleAppearanceForFrame(shown: Bool) {
         withAnimation(animation) {
-            self.frameSize = switch shown {
-                case true: .none
-                case false: .zero
-            }
+            self.frameSize = frameSize(for: shown)
+        }
+    }
+
+    private func frameSize(for shown: Bool) -> CGSize? {
+        return switch shown {
+            case true: .none
+            case false: .zero
         }
     }
 }
