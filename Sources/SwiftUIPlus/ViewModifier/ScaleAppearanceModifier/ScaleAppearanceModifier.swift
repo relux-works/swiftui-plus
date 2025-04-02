@@ -18,17 +18,19 @@ public extension View {
 }
 
 struct ScaleAppearanceModifier: ViewModifier {
-    @State private var frameSize: CGSize? = .zero
+    @State private var frameSize: CGSize? // animated content size
+    @State private var rect: CGRect? // content ideal size rect
 
     @Binding var shown: Bool
     let animation: Animation
     let anchor: Alignment
 
     func body(content: Content) -> some View {
-        content
+        Color.clear
+            .frame(width: .none, height: rect?.height)
             .opacity(0)
-            .frame(height: frameSize?.height)
-            .overlay(alignment: anchor) { content }
+            .frame(width: .none, height: frameSize?.height)
+            .overlay(alignment: anchor) { content.storingSize(in: $rect) }
             .clipped()
             .animation(animation, value: shown)
             .onAppear { self.frameSize = frameSize(for: shown) }
