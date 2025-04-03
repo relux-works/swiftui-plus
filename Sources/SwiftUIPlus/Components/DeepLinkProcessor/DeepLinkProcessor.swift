@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-public protocol IDeepLinkProcessor {
+public protocol IDeepLinkProcessor: Sendable {
     func process(url: URL, in parentVC: UIViewController?)
     func validate(url: URL, in parentVC: UIViewController?) -> Bool
 }
