@@ -1,17 +1,20 @@
 import SwiftUI
 
-public struct PreventDisaplySleepKey: EnvironmentKey {
-    public static let defaultValue: @Sendable (Bool)->() = { toggle in
-        Task { @MainActor in
-            UIApplication.shared.isIdleTimerDisabled = toggle
-        }
+public struct PreventDisplaySleepAction: Sendable {
+    @MainActor
+    public func callAsFunction(_ toggle: Bool) {
+        UIApplication.shared.isIdleTimerDisabled = toggle
     }
 }
 
+public struct PreventDisplaySleepKey: EnvironmentKey {
+    public static let defaultValue = PreventDisplaySleepAction()
+}
+
 public extension EnvironmentValues {
-    var preventDisaplySleep: (Bool)->() {
+    var preventDisplaySleep: PreventDisplaySleepAction {
         get {
-            self[PreventDisaplySleepKey.self]
+            self[PreventDisplaySleepKey.self]
         }
     }
 }
