@@ -1,10 +1,9 @@
 import SwiftUI
 
 public struct PreventDisplaySleepAction: Sendable {
+    @MainActor
     public func callAsFunction(_ toggle: Bool) {
-        Task { @MainActor in
-            UIApplication.shared.isIdleTimerDisabled = toggle
-        }
+        UIApplication.shared.isIdleTimerDisabled = toggle
     }
 }
 
