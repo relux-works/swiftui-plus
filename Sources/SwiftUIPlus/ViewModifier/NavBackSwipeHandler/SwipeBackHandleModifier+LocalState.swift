@@ -6,7 +6,7 @@ extension SwipeBackHandleModifier {
         @Published var contentRect: CGRect = .zero
         @Published private(set) var onSwipeBack: Bool = false
         @Published var disableSwipeBack: Bool
-        @Published var nc: UINavigationController?
+        weak var nc: UINavigationController?
 
         init(disableSwipeBack: Bool) {
             self.disableSwipeBack = disableSwipeBack
