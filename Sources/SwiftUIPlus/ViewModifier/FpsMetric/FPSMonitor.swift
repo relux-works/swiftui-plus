@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension View {
-    public func showFPS(enabled: Bool = false) -> some View {
+    public func fpsMetric(enabled: Bool = false) -> some View {
         self
             .modifier(FpsMonitorModifier(enabled: enabled))
     }
