@@ -28,9 +28,12 @@ struct ScaleAppearanceModifier: ViewModifier {
     func body(content: Content) -> some View {
         Color.clear
             .frame(width: .none, height: rect?.height)
-            .opacity(0)
             .frame(width: .none, height: frameSize?.height)
-            .overlay(alignment: anchor) { content.storingSize(in: $rect) }
+            .overlay(alignment: anchor) {
+                content
+                    .storingSize(in: $rect)
+                    .allowsHitTesting(shown)
+            }
             .clipped()
             .animation(animation, value: shown)
             .onAppear { self.frameSize = frameSize(for: shown) }
