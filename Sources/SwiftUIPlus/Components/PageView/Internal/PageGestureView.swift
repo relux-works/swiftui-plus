@@ -17,6 +17,7 @@ extension PageGestureView {
 		pageLength: CGFloat,
 		spacing: CGFloat,
 		viewLength: CGFloat,
+        defaultMinimumDistance: CGFloat,
 		activePageIndex: Binding<Int?>?
 	) {
 		
@@ -29,6 +30,7 @@ extension PageGestureView {
 		self.pageLength = pageLength
 		self.spacing = spacing
 		self.viewLength = viewLength
+        self.defaultMinimumDistance = defaultMinimumDistance
 		self.activePageIndex = activePageIndex
 	}
 	
@@ -54,6 +56,7 @@ internal struct PageGestureView<Content>: View where Content : View {
 	private var pageLength: CGFloat
 	private var spacing: CGFloat
 	private var viewLength: CGFloat
+    private var defaultMinimumDistance: CGFloat
 	private var activePageIndex: Binding<Int?>?
 	
 	var body: some View {
@@ -116,7 +119,7 @@ internal struct PageGestureView<Content>: View where Content : View {
 		let minimumDistance: CGFloat
 		
 		switch pageState.dragState {
-			case .dragging, .nearlyEnded, .ended: minimumDistance = 15
+			case .dragging, .nearlyEnded, .ended: minimumDistance = defaultMinimumDistance
 			case .ending: minimumDistance = 0
 		}
 		

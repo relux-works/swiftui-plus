@@ -17,6 +17,7 @@ where Content : View
     @ViewBuilder internal var content: () -> Content
     internal var pageLength: CGFloat?
     internal var spacing: CGFloat?
+    internal var defaultMinimumDistance: CGFloat
     internal var activePageIndex: Binding<Int?>?
 
     public var body: some View {
@@ -34,6 +35,7 @@ where Content : View
                     pageLength: pageLength,
                     spacing: spacing,
                     viewLength: viewLength,
+                    defaultMinimumDistance: defaultMinimumDistance,
                     activePageIndex: activePageIndex
             )
         }
@@ -66,6 +68,7 @@ public extension PageView {
          pageLength: CGFloat? = nil,
          spacing: CGFloat? = nil,
          activePageIndex: Binding<Int?>,
+         defaultMinimumDistance: CGFloat,
 		 @ViewBuilder content: @escaping () -> Content)
     {
         self.alignment = alignment.alignment
@@ -73,6 +76,7 @@ public extension PageView {
         self.content = content
         self.pageLength = pageLength
         self.spacing = spacing
+        self.defaultMinimumDistance = defaultMinimumDistance
         self.activePageIndex = activePageIndex
     }
 }
