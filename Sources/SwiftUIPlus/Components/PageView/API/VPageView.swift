@@ -31,6 +31,7 @@ where Content : View
                 pageHeight: CGFloat? = nil,
                 spacing: CGFloat? = nil,
                 activePageIndex: Binding<Int?>? = nil,
+                defaultMinimumDistance: CGFloat = 15,
                 @ViewBuilder content: @escaping () -> Content)
     {
         body = PageView(
@@ -39,6 +40,7 @@ where Content : View
                 content: content,
                 pageLength: pageHeight,
                 spacing: spacing,
+                defaultMinimumDistance: defaultMinimumDistance,
                 activePageIndex: activePageIndex
         )
     }

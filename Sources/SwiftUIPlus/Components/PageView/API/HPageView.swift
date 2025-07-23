@@ -21,6 +21,9 @@ public struct HPageView<Content>: View where Content: View {
 	
 	@usableFromInline
 	let activePageIndex: Binding<Int?>?
+    
+    @usableFromInline
+    let defaultMinimumDistance: CGFloat
 	
 	@usableFromInline
 	@ViewBuilder let content: () -> Content
@@ -33,7 +36,8 @@ public struct HPageView<Content>: View where Content: View {
 			content: content,
 			pageLength: pageWidth,
 			spacing: spacing,
-			activePageIndex: activePageIndex
+            defaultMinimumDistance: defaultMinimumDistance,
+            activePageIndex: activePageIndex
 		)
 		
 	}
@@ -56,12 +60,14 @@ public struct HPageView<Content>: View where Content: View {
                 pageWidth: CGFloat? = nil,
                 spacing: CGFloat? = nil,
                 activePageIndex: Binding<Int?>? = nil,
+                defaultMinimumDistance: CGFloat = 15,
                 @ViewBuilder content: @escaping () -> Content)
     {
 		self.alignment = alignment
 		self.pageWidth = pageWidth
 		self.spacing = spacing
 		self.activePageIndex = activePageIndex
+        self.defaultMinimumDistance = defaultMinimumDistance
 		self.content = content
     }
 }
