@@ -1,5 +1,22 @@
 import SwiftUI
 
+extension FpsMonitorModifier.LS {
+    enum Highlight {
+        case none, extremelyLow, low, medium, high
+    }
+}
+extension FpsMonitorModifier.LS.Highlight {
+    var associatedColor: Color {
+        switch self {
+            case .none: .gray
+            case .extremelyLow: .red
+            case .low: .orange
+            case .medium: .yellow
+            case .high: .green
+        }
+    }
+}
+
 extension FpsMonitorModifier {
     @MainActor
     final class LS: ObservableObject {
@@ -8,22 +25,29 @@ extension FpsMonitorModifier {
         private var getTimestamp: CFTimeInterval { CACurrentMediaTime() }
         private var lastTimestamp: CFTimeInterval?
         private var frameCount: Double = 0
-        private var minimalTimeInterval: CFTimeInterval = 1
+        private var minimalTimeInterval: CFTimeInterval
 
+        @Published private(set) var highlight: Highlight = .none
         @Published private(set) var fpsCount: Double = 0
 
-        init() {
-            let displayLink = CADisplayLink(target: self, selector: #selector(self.onTick))
-            displayLink.add(to: .main, forMode: .common)
-
-            lock.withLock {
-                self.displayLink = displayLink
-            }
+        init(props: Props) {
+            self.minimalTimeInterval = props.minTimeInterval
+            setupDisplayLink()
+            initPipelines()
         }
 
         deinit {
             lock.withLock {
                 self.displayLink?.invalidate()
+            }
+        }
+
+        private func setupDisplayLink() {
+            let displayLink = CADisplayLink(target: self, selector: #selector(self.onTick))
+            displayLink.add(to: .main, forMode: .common)
+
+            lock.withLock {
+                self.displayLink = displayLink
             }
         }
 
@@ -53,6 +77,20 @@ extension FpsMonitorModifier {
 
         private func onUpdate(_ fps: Double) {
             self.fpsCount = fps
+        }
+
+        private func initPipelines() {
+            $fpsCount
+                .map {
+                    switch $0 {
+                        case 50...: Highlight.high
+                        case 40...50: Highlight.medium
+                        case 30...40: Highlight.low
+                        case 1...30: Highlight.extremelyLow
+                        default: Highlight.none
+                    }
+                }
+                .assign(to: &$highlight)
         }
     }
 }

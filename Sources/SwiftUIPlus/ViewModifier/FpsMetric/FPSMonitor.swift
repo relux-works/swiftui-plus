@@ -1,16 +1,36 @@
 import SwiftUI
 
 extension View {
-    public func fpsMetric(enabled: Bool = false) -> some View {
+    public func fpsMetric(
+        enabled: Bool = true,
+        minTimeInterval: TimeInterval = 1.5
+    ) -> some View {
         self
-            .modifier(FpsMonitorModifier(enabled: enabled))
+            .modifier(
+                FpsMonitorModifier(
+                    props: .init(enabled: enabled, minTimeInterval: minTimeInterval)
+                )
+            )
     }
 }
 
+extension FpsMonitorModifier {
+    struct Props {
+        let enabled: Bool
+        let minTimeInterval: TimeInterval
+    }
+}
 struct FpsMonitorModifier: ViewModifier {
-    @StateObject private var ls: LS = .init()
+    @StateObject private var ls: LS
 
-    let enabled: Bool
+    private let props: Props
+
+    init(
+        props: Props
+    ) {
+        self.props = props
+        self._ls = .init(wrappedValue: .init(props: props))
+    }
 
     func body(content: Content) -> some View {
         content
@@ -20,7 +40,7 @@ struct FpsMonitorModifier: ViewModifier {
     @ViewBuilder
     private func monitor() -> some View {
         indicator
-            .presentIf(enabled)
+            .presentIf(props.enabled)
     }
 
 
@@ -29,7 +49,11 @@ struct FpsMonitorModifier: ViewModifier {
             .monospacedDigit()
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color.gray.opacity(0.2))
+            .background(indicatorBg)
             .cornerRadius(8, corners: .allCorners)
+    }
+
+    private var indicatorBg: some View {
+        ls.highlight.associatedColor.opacity(0.3)
     }
 }

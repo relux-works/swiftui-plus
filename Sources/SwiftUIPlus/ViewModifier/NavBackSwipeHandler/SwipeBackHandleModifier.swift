@@ -24,13 +24,21 @@ struct SwipeBackHandleModifier: ViewModifier {
                 ls.nc = vc.findSpecificChildVC()
                 switch phase {
                     case .willAppear:
-                        break
+                        if ls.disableSwipeBack {
+                            ls.nc?.interactivePopGestureRecognizer?.isEnabled = false
+                        }
                     case .didAppear:
-                        ls.nc?.interactivePopGestureRecognizer?.isEnabled = ls.disableSwipeBack.not
+                        if ls.disableSwipeBack.not {
+                            ls.nc?.interactivePopGestureRecognizer?.isEnabled = true
+                        }
                     case .willDisappear:
-                        ls.nc?.interactivePopGestureRecognizer?.isEnabled = true
+                        if ls.disableSwipeBack.not {
+                            ls.nc?.interactivePopGestureRecognizer?.isEnabled = true
+                        }
                     case .didDisappear:
-                        break
+                        if ls.disableSwipeBack {
+                            ls.nc?.interactivePopGestureRecognizer?.isEnabled = true
+                        }
                 }
             }
             .onChange(of: disableBackNavigation, perform: {
