@@ -20,25 +20,33 @@ struct SwipeBackHandleModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-          .onAppearanceChange { vc, phase in
+            .overlay {
+                Color.clear.allowsTightening(true).presentIf(ls.disableContent)
+            }
+            .allowsTightening(ls.disableContent.not)
+            .onAppearanceChange { vc, phase in
                 ls.nc = vc.findSpecificChildVC()
                 switch phase {
                     case .willAppear:
                         if ls.disableSwipeBack {
                             ls.nc?.interactivePopGestureRecognizer?.isEnabled = false
                         }
+                        ls.inTransition = true
                     case .didAppear:
                         if ls.disableSwipeBack.not {
                             ls.nc?.interactivePopGestureRecognizer?.isEnabled = true
                         }
+                        ls.inTransition = false
                     case .willDisappear:
                         if ls.disableSwipeBack.not {
                             ls.nc?.interactivePopGestureRecognizer?.isEnabled = true
                         }
+                        ls.inTransition = true
                     case .didDisappear:
                         if ls.disableSwipeBack {
                             ls.nc?.interactivePopGestureRecognizer?.isEnabled = true
                         }
+                        ls.inTransition = false
                 }
             }
             .onChange(of: disableBackNavigation, perform: {
