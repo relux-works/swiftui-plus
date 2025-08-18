@@ -21,9 +21,9 @@ struct SwipeBackHandleModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay {
-                Color.clear.allowsTightening(true).presentIf(ls.disableContent)
+                Color.gray.opacity(0.003).ignoresSafeArea().presentIf(ls.disableContent)
+                    .onTapGesture { print("swipe handler: tap on plate while transition") }
             }
-            .allowsTightening(ls.disableContent.not)
             .onAppearanceChange { vc, phase in
                 ls.nc = vc.findSpecificChildVC()
                 switch phase {
