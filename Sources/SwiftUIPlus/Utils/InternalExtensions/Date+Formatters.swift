@@ -57,6 +57,20 @@ extension Date {
     var timeWithMillis: String {
         "\(self.toString(as: "HH:mm:ss.SSS", timezone: .current))"
     }
+
+    var timeWithNanos: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        formatter.timeZone = .current
+
+        let base = formatter.string(from: self)
+
+        let nanos = Calendar.current.component(.nanosecond, from: self)
+            // форматируем с ведущими нулями до 9 знаков
+        let nanosStr = String(format: "%09d", nanos)
+
+        return "\(base).\(nanosStr)"
+    }
 }
 
 
