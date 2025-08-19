@@ -42,7 +42,7 @@ extension SwipeBackHandleModifier {
                     guard let self else { return }
                     self.actualiseBackNavigation(for: self.nc, backNavEnabled: self.disableSwipeBack.not, with: phase)
                     if self.disableContentOnTransition {
-                        self.actualiseContentBlockingOnTransition(for: self.nc, contentDim: 0.2, with: phase)
+                        self.actualiseContentBlockingOnTransition(for: self.nc, contentDim: 0.0, with: phase)
                     }
                 }
                 .store(in: &pipelines)
