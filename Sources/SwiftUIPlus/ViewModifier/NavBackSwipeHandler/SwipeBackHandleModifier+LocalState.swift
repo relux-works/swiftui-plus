@@ -90,10 +90,9 @@ extension SwipeBackHandleModifier {
 
             switch phase {
                 case .willAppear:
-                    break
                     // actually problem with content is only for willDisappear
                     // in some cases with custom animation it's tappable even if not visible while the view is not disappeared in view hierarchy
-//                    nc?.blockContent(dim: contentDim, from: phase.debugDescription)
+                    nc?.blockContent(dimColor: dimColor, from: phase.debugDescription)
                 case .didAppear:
                     nc?.unblockContent(from: phase.debugDescription)
                 case .willDisappear:
