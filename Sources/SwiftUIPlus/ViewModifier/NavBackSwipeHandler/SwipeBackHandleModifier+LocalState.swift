@@ -12,17 +12,20 @@ extension SwipeBackHandleModifier {
         @Published var inTransition: Bool = false
         @Published var disableContent: Bool = false
 
-        private var disableContentOnTransition: Bool
-        weak var nc: UINavigationController?
-        @Published var ncPhase: ControllerAppearanceType?
+        private var contentOnTransitionMode: ContentOnTransitionMode
+        private(set) weak var nc: UINavigationController?
 
         init(
             disableSwipeBack: Bool,
-            disableContentOnTransition: Bool
+            contentOnTransitionMode: ContentOnTransitionMode
         ) {
             self.disableSwipeBack = disableSwipeBack
-            self.disableContentOnTransition = disableContentOnTransition
+            self.contentOnTransitionMode = contentOnTransitionMode
             initPipelines()
+        }
+
+        deinit {
+            print(Date.now.timeWithNanos, "swipe handler: LS deinit")
         }
 
         private func initPipelines() {
@@ -36,17 +39,6 @@ extension SwipeBackHandleModifier {
                 .receive(on: DispatchQueue.main)
                 .assign(to: &$onSwipeBack)
 
-            $ncPhase
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] phase in
-                    guard let self else { return }
-                    self.actualiseBackNavigation(for: self.nc, backNavEnabled: self.disableSwipeBack.not, with: phase)
-                    if self.disableContentOnTransition {
-                        self.actualiseContentBlockingOnTransition(for: self.nc, contentDim: 0.0, with: phase)
-                    }
-                }
-                .store(in: &pipelines)
-
             $disableSwipeBack
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] toggle in
@@ -54,6 +46,20 @@ extension SwipeBackHandleModifier {
                     self.nc?.interactivePopGestureRecognizer?.isEnabled = toggle.not
                 }
                 .store(in: &pipelines)
+        }
+
+        func handleControllerState(vc: UIViewController, phase: ControllerAppearanceType) {
+            self.nc = self.nc ?? vc.findSpecificChildVC()
+            self.applyViewPhase(phase)
+        }
+
+        func applyViewPhase(_ phase: ControllerAppearanceType?) {
+            self.actualiseBackNavigation(for: self.nc, backNavEnabled: self.disableSwipeBack.not, with: phase)
+
+            switch contentOnTransitionMode {
+                case .enabled: break
+                case let .disabled(dimColor):  self.actualiseContentBlockingOnTransition(for: self.nc, dimColor: dimColor, with: phase)
+            }
         }
 
         private func actualiseBackNavigation(
@@ -77,18 +83,21 @@ extension SwipeBackHandleModifier {
 
         private func actualiseContentBlockingOnTransition(
             for nc: UINavigationController?,
-            contentDim: CGFloat,
+            dimColor: Color,
             with phase: ControllerAppearanceType?
         ) {
-            print(Date.now.timeWithNanos, "swipe handler: actualiseContentBlockingOnTransition for phase \(phase.debugDescription)")
+            print(Date.now.timeWithNanos, "swipe handler: actualiseContentBlockingOnTransition for phase \(phase.debugDescription) nc: \(nc != nil)")
 
             switch phase {
                 case .willAppear:
-                    nc?.blockContent(dim: contentDim, from: phase.debugDescription)
+                    break
+                    // actually problem with content is only for willDisappear
+                    // in some cases with custom animation it's tappable even if not visible while the view is not disappeared in view hierarchy
+//                    nc?.blockContent(dim: contentDim, from: phase.debugDescription)
                 case .didAppear:
                     nc?.unblockContent(from: phase.debugDescription)
                 case .willDisappear:
-                    nc?.blockContent(dim: contentDim, from: phase.debugDescription)
+                    nc?.blockContent(dimColor: dimColor, from: phase.debugDescription)
                 case .didDisappear:
                     nc?.unblockContent(from: phase.debugDescription)
                 case .none:

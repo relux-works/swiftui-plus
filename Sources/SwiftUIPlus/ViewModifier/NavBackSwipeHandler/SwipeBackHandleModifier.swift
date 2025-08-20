@@ -1,32 +1,35 @@
 import SwiftUI
 import Combine
 
-struct SwipeBackHandleModifier: ViewModifier {
+public struct SwipeBackHandleModifier: ViewModifier {
     @StateObject private var ls: LocalState
     private let onBack: (()->())?
     private let onTryDisabledBack: (()->())?
     private let disableBackNavigation: Bool
 
-    init(
+    public init(
         disableBackNavigation: Bool,
-        disableContentOnTransition: Bool,
+        contentOnTransitionMode: ContentOnTransitionMode,
         onBack: (()->())?,
         onTryDisabledBack: (()->())?
     ) {
         self._ls = .init(wrappedValue: .init(
             disableSwipeBack: disableBackNavigation,
-            disableContentOnTransition: disableContentOnTransition
+            contentOnTransitionMode: contentOnTransitionMode
         ))
         self.disableBackNavigation = disableBackNavigation
         self.onBack = onBack
         self.onTryDisabledBack = onTryDisabledBack
     }
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
+            .onDisappear {
+                print(Date.now.timeWithNanos, "swipe handler: onDisappear")
+                ls.applyViewPhase(.didDisappear)
+            }
             .onAppearanceChange { vc, phase in
-                ls.nc = vc.findSpecificChildVC()
-                ls.ncPhase = phase
+                ls.handleControllerState(vc: vc, phase: phase)
             }
             .onChange(of: disableBackNavigation, perform: {
                 ls.disableSwipeBack = $0
