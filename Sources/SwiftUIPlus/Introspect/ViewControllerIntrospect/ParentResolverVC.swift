@@ -21,7 +21,7 @@ public final class ParentResolverViewController: UIViewController {
         super.viewWillDisappear(animated)
         Task {@MainActor [weak self] in
             guard let self else { return }
-            await self.onAppearanceChange?(self, .willDisappear)
+            await self.onAppearanceChange?(self.parent ?? self, .willDisappear)
         }
     }
 
@@ -29,7 +29,7 @@ public final class ParentResolverViewController: UIViewController {
         super.viewDidAppear(animated)
         Task {@MainActor [weak self] in
             guard let self else { return }
-            await self.onAppearanceChange?(self, .didAppear)
+            await self.onAppearanceChange?(self.parent ?? self, .didAppear)
         }
     }
 
@@ -37,7 +37,7 @@ public final class ParentResolverViewController: UIViewController {
         super.viewWillAppear(animated)
         Task {@MainActor [weak self] in
             guard let self else { return }
-            await self.onAppearanceChange?(self, .willAppear)
+            await self.onAppearanceChange?(self.parent ?? self, .willAppear)
         }
     }
 
@@ -45,17 +45,18 @@ public final class ParentResolverViewController: UIViewController {
         super.viewDidDisappear(animated)
         Task {@MainActor [weak self] in
             guard let self else { return }
-            await self.onAppearanceChange?(self, .didDisappear)
+            await self.onAppearanceChange?(self.parent ?? self, .didDisappear)
         }
     }
 
-
+    
     override public func didMove(toParent parent: UIViewController?) {
         super.didMove(toParent: parent)
 
         Task {@MainActor [weak self, weak parent] in
-            guard let self, let parent else { return }
-            guard  let parent = self.parent else { return }
+            guard let self,
+                  let parent
+            else { return }
             await self.onResolve?(parent)
         }
     }

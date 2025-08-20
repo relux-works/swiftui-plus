@@ -14,6 +14,7 @@ extension SwipeBackHandleModifier {
 
         private var contentOnTransitionMode: ContentOnTransitionMode
         private(set) weak var nc: UINavigationController?
+        private(set) weak var vc: UIViewController?
 
         init(
             disableSwipeBack: Bool,
@@ -37,7 +38,7 @@ extension SwipeBackHandleModifier {
                 .throttle(for: 0.1, scheduler: DispatchQueue.main, latest: true)
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
-                .assign(to: &$onSwipeBack)
+                .assign(to: &$onSwipeBack)  
 
             $disableSwipeBack
                 .receive(on: DispatchQueue.main)
@@ -49,6 +50,7 @@ extension SwipeBackHandleModifier {
         }
 
         func handleControllerState(vc: UIViewController, phase: ControllerAppearanceType) {
+            self.vc = self.vc ?? vc
             self.nc = self.nc ?? vc.findSpecificChildVC()
             self.applyViewPhase(phase)
         }
@@ -58,7 +60,7 @@ extension SwipeBackHandleModifier {
 
             switch contentOnTransitionMode {
                 case .enabled: break
-                case let .disabled(dimColor):  self.actualiseContentBlockingOnTransition(for: self.nc, dimColor: dimColor, with: phase)
+                case let .disabled(dimColor): self.actualiseContentBlockingOnTransition(for: self.vc, dimColor: dimColor, with: phase)
             }
         }
 
@@ -82,7 +84,7 @@ extension SwipeBackHandleModifier {
         }
 
         private func actualiseContentBlockingOnTransition(
-            for nc: UINavigationController?,
+            for vc: UIViewController?,
             dimColor: Color,
             with phase: ControllerAppearanceType?
         ) {
@@ -92,13 +94,13 @@ extension SwipeBackHandleModifier {
                 case .willAppear:
                     // actually problem with content is only for willDisappear
                     // in some cases with custom animation it's tappable even if not visible while the view is not disappeared in view hierarchy
-                    nc?.blockContent(dimColor: dimColor, from: phase.debugDescription)
+                    vc?.blockContent(dimColor: dimColor, from: phase.debugDescription)
                 case .didAppear:
-                    nc?.unblockContent(from: phase.debugDescription)
+                    vc?.unblockContent(from: phase.debugDescription)
                 case .willDisappear:
-                    nc?.blockContent(dimColor: dimColor, from: phase.debugDescription)
+                    vc?.blockContent(dimColor: dimColor, from: phase.debugDescription)
                 case .didDisappear:
-                    nc?.unblockContent(from: phase.debugDescription)
+                    vc?.unblockContent(from: phase.debugDescription)
                 case .none:
                     break
             }

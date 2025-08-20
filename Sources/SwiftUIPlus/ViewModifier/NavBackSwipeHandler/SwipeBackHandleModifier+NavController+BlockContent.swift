@@ -1,29 +1,37 @@
-extension UINavigationController {
-    private static let shieldId = "nc_block_content_cover".hashValue
+extension UIViewController {
+    private static let contentCoverId = "vc_block_content_cover".hashValue
     private static let lock = NSLock()
     private var id: String { ObjectIdentifier(self).debugDescription }
 
+
     func blockContent(dimColor: Color, from: String = #function) {
         Self.lock.withLock {
-            guard view.viewWithTag(Self.shieldId) == .none else { return }
-
-            let shield = UIControl(frame: view.bounds)
-            shield.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            shield.backgroundColor = UIColor(dimColor)
-            shield.isUserInteractionEnabled = true
-            shield.tag = Self.shieldId
-            print(Date.now.timeWithNanos, "swipe handler: blockContent from \(from), nc: \(id) blockContent")
-
-            view.addSubview(shield)
+            if view.viewWithTag(Self.contentCoverId) == .none {
+                print(Date.now.timeWithNanos, "swipe handler: blockContent from \(from), nc: \(id) blockContent")
+                view.addSubview(contentCover(color: dimColor))
+            }
         }
     }
 
     func unblockContent(from: String = #function) {
         Self.lock.withLock {
-            let shield = view.viewWithTag(Self.shieldId)
-            print(Date.now.timeWithNanos, "swipe handler: unblockContent from \(from), shield found \(shield != nil)")
-
-            shield?.removeFromSuperview()
+            let cover = view.viewWithTag(Self.contentCoverId)
+            print(Date.now.timeWithNanos, "swipe handler: unblockContent from \(from), shield found \(cover != nil)")
+            cover?.removeFromSuperview()
         }
+    }
+
+    private func contentCover(color: Color) -> UIControl {
+        cover(color: color, tag: Self.contentCoverId, frame: view.bounds)
+    }
+
+    private func cover(color: Color, tag: Int, frame: CGRect) -> UIControl {
+        let cover = UIControl(frame: frame)
+        cover.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        cover.backgroundColor = UIColor(color)
+        cover.isUserInteractionEnabled = true
+        cover.tag = tag
+
+        return cover
     }
 }
