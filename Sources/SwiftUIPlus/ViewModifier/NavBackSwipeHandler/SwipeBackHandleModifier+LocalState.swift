@@ -71,13 +71,14 @@ extension SwipeBackHandleModifier {
         ) {
             switch phase {
                 case .willAppear:
-                    nc?.interactivePopGestureRecognizer?.isEnabled = backNavEnabled
+                    if #available(iOS 18.0, *) {
+                        nc?.interactivePopGestureRecognizer?.isEnabled = backNavEnabled
+                    }
                 case .didAppear:
-                    self.nc?.interactivePopGestureRecognizer?.isEnabled = backNavEnabled
                 case .willDisappear:
-                    self.nc?.interactivePopGestureRecognizer?.isEnabled = backNavEnabled
+                    break
                 case .didDisappear:
-                    self.nc?.interactivePopGestureRecognizer?.isEnabled = true
+                    break
                 case .none:
                     break
             }
