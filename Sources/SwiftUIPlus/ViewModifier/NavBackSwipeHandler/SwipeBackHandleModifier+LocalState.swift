@@ -75,6 +75,7 @@ extension SwipeBackHandleModifier {
                         nc?.interactivePopGestureRecognizer?.isEnabled = backNavEnabled
                     }
                 case .didAppear:
+                    nc?.interactivePopGestureRecognizer?.isEnabled = backNavEnabled
                 case .willDisappear:
                     break
                 case .didDisappear:
