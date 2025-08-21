@@ -25,10 +25,6 @@ extension SwipeBackHandleModifier {
             initPipelines()
         }
 
-        deinit {
-            print(Date.now.timeWithNanos, "swipe handler: LS deinit")
-        }
-
         private func initPipelines() {
             $inTransition
                 .assign(to: &$disableContent)
@@ -57,7 +53,6 @@ extension SwipeBackHandleModifier {
 
         func applyViewPhase(_ phase: ControllerAppearanceType?) {
             self.actualiseBackNavigation(for: self.nc, backNavEnabled: self.disableSwipeBack.not, with: phase)
-
             switch contentOnTransitionMode {
                 case .enabled: break
                 case let .disabled(dimColor): self.actualiseContentBlockingOnTransition(for: self.vc, dimColor: dimColor, with: phase)
@@ -71,9 +66,7 @@ extension SwipeBackHandleModifier {
         ) {
             switch phase {
                 case .willAppear:
-                    if #available(iOS 18.0, *) {
-                        nc?.interactivePopGestureRecognizer?.isEnabled = backNavEnabled
-                    }
+                    break
                 case .didAppear:
                     nc?.interactivePopGestureRecognizer?.isEnabled = backNavEnabled
                 case .willDisappear:
@@ -83,6 +76,8 @@ extension SwipeBackHandleModifier {
                 case .none:
                     break
             }
+
+            print(Date.now.timeWithNanos, "swipe handler: actualiseBackNavigation for phase \(phase.debugDescription) nc: \( nc?.interactivePopGestureRecognizer?.isEnabled.description ?? "undefined"), expected: \(backNavEnabled)")
         }
 
         private func actualiseContentBlockingOnTransition(
@@ -90,7 +85,7 @@ extension SwipeBackHandleModifier {
             dimColor: Color,
             with phase: ControllerAppearanceType?
         ) {
-            print(Date.now.timeWithNanos, "swipe handler: actualiseContentBlockingOnTransition for phase \(phase.debugDescription) nc: \(nc != nil)")
+//            print(Date.now.timeWithNanos, "swipe handler: actualiseContentBlockingOnTransition for phase \(phase.debugDescription) nc: \(nc != nil)")
 
             switch phase {
                 case .willAppear:

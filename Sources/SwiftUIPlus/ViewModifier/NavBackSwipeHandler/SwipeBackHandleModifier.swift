@@ -25,7 +25,8 @@ public struct SwipeBackHandleModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .onDisappear {
-                print(Date.now.timeWithNanos, "swipe handler: onDisappear")
+                // for new zoomed transition navigation
+                // fixed absent status for didDisappear
                 ls.applyViewPhase(.didDisappear)
             }
             .onAppearanceChange { vc, phase in
