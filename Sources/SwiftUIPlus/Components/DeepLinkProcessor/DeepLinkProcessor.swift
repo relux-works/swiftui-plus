@@ -2,8 +2,8 @@ import Foundation
 import UIKit
 
 public protocol IDeepLinkProcessor: Sendable {
-    func process(url: URL, in parentVC: UIViewController?)
-    func validate(url: URL, in parentVC: UIViewController?) -> Bool
+    func process(url: URL)
+    func validate(url: URL) -> Bool
 }
 
 public struct DeepLinkProcessor: IDeepLinkProcessor {
@@ -13,13 +13,13 @@ public struct DeepLinkProcessor: IDeepLinkProcessor {
         self.handlers = handlers
     }
 
-    public func process(url: URL, in parentVC: UIViewController?) {
+    public func process(url: URL) {
         handlers
-            .first { $0.validate(url: url, in: parentVC) }?
-            .process(url: url, in: parentVC)
+            .first { $0.validate(url: url) }?
+            .process(url: url)
     }
 
-    public func validate(url: URL, in parentVC: UIViewController?) -> Bool {
-        handlers.contains { $0.validate(url: url, in: parentVC) }
+    public func validate(url: URL) -> Bool {
+        handlers.contains { $0.validate(url: url) }
     }
 }
