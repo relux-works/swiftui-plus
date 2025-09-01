@@ -88,7 +88,7 @@ struct KeyboardDismissOverlayModifier: ViewModifier {
 
     @ViewBuilder
     private var tapHandler: some View {
-        switch keyboardObserver.shown && ls.frames.isEmpty.not {
+        switch keyboardObserver.shown {
         case true:
             OverlayShape(holes: $ls.frames)
                 .foregroundColor(.white.opacity(0.005))
