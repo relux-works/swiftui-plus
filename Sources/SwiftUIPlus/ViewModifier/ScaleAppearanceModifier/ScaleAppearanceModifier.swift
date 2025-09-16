@@ -5,7 +5,7 @@ public extension View {
         shown: Binding<Bool>,
         animation: Animation = .easeInOut,
         anchor: Alignment = .center,
-        mode: ScaleAppearanceModifierMode = .vertical
+        mode: ScaleAppearanceModifier.Mode = .vertical
     ) -> some View {
         self
             .modifier(
@@ -19,21 +19,23 @@ public extension View {
     }
 }
 
-public enum ScaleAppearanceModifierMode {
-    case vertical
-    case horizontal
+extension ScaleAppearanceModifier {
+    public enum Mode {
+        case vertical
+        case horizontal
+    }
 }
 
-struct ScaleAppearanceModifier: ViewModifier {
+public struct ScaleAppearanceModifier: ViewModifier {
     @State private var frameSize: CGSize? // animated content size
     @State private var rect: CGRect? // content ideal size rect
 
     @Binding var shown: Bool
     let animation: Animation
     let anchor: Alignment
-    let mode: ScaleAppearanceModifierMode
+    let mode: Mode
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         Color.clear
             .frame(width: contentWidth, height: contentHeight)
             .frame(width: frameWidth, height: frameHeight)
