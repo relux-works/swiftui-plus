@@ -4,31 +4,41 @@ public extension View {
     func scaleAppearance(
         shown: Binding<Bool>,
         animation: Animation = .easeInOut,
-        anchor: Alignment = .center
+        anchor: Alignment = .center,
+        mode: ScaleAppearanceModifier.Mode = .vertical
     ) -> some View {
         self
             .modifier(
                 ScaleAppearanceModifier(
                     shown: shown,
                     animation: animation,
-                    anchor: anchor
+                    anchor: anchor,
+                    mode: mode
                 )
             )
     }
 }
 
-struct ScaleAppearanceModifier: ViewModifier {
+extension ScaleAppearanceModifier {
+    public enum Mode {
+        case vertical
+        case horizontal
+    }
+}
+
+public struct ScaleAppearanceModifier: ViewModifier {
     @State private var frameSize: CGSize? // animated content size
     @State private var rect: CGRect? // content ideal size rect
 
     @Binding var shown: Bool
     let animation: Animation
     let anchor: Alignment
+    let mode: Mode
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         Color.clear
-            .frame(width: .none, height: rect?.height)
-            .frame(width: .none, height: frameSize?.height)
+            .frame(width: contentWidth, height: contentHeight)
+            .frame(width: frameWidth, height: frameHeight)
             .overlay(alignment: anchor) {
                 content
                     .storingSize(in: $rect)
@@ -50,6 +60,36 @@ struct ScaleAppearanceModifier: ViewModifier {
         switch shown {
             case true: .none
             case false: .zero
+        }
+    }
+}
+
+extension ScaleAppearanceModifier {
+    private var contentWidth: CGFloat? {
+        switch mode {
+            case .vertical: .none
+            case .horizontal: rect?.width
+        }
+    }
+
+    private var contentHeight: CGFloat? {
+        switch mode {
+            case .vertical: rect?.height
+            case .horizontal: .none
+        }
+    }
+
+    private var frameWidth: CGFloat? {
+        switch mode {
+            case .vertical: .none
+            case .horizontal: frameSize?.width
+        }
+    }
+
+    private var frameHeight: CGFloat? {
+        switch mode {
+            case .vertical: frameSize?.height
+            case .horizontal: .none
         }
     }
 }
