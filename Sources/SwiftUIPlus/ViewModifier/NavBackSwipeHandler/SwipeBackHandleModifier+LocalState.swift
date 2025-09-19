@@ -55,7 +55,7 @@ extension SwipeBackHandleModifier {
             self.actualiseBackNavigation(for: self.nc, backNavEnabled: self.disableSwipeBack.not, with: phase)
             switch contentOnTransitionMode {
                 case .enabled: break
-                case let .disabled(dimColor): self.actualiseContentBlockingOnTransition(for: self.vc, dimColor: dimColor, with: phase)
+                case let .disabled(dimColor): self.actualiseContentBlockingOnTransition(for: self.nc, dimColor: dimColor, with: phase)
             }
         }
 
