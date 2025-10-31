@@ -5,7 +5,7 @@ public extension View {
         shown: Binding<Bool>,
         animation: Animation = .easeInOut,
         anchor: Alignment = .center,
-        mode: ScaleAppearanceModifier.Mode = .vertical
+        mode: ScaleAppearanceModifier.Mode = .vertical()
     ) -> some View {
         self
             .modifier(
@@ -21,13 +21,13 @@ public extension View {
 
 extension ScaleAppearanceModifier {
     public enum Mode {
-        case vertical
-        case horizontal
+        case vertical(minHeight: CGFloat = 0)
+        case horizontal(minWidth: CGFloat = 0)
     }
 }
 
 public struct ScaleAppearanceModifier: ViewModifier {
-    @State private var frameSize: CGSize? // animated content size
+    @State private var frameValue: CGFloat? // animated content size
     @State private var rect: CGRect? // content ideal size rect
 
     @Binding var shown: Bool
@@ -46,20 +46,23 @@ public struct ScaleAppearanceModifier: ViewModifier {
             }
             .clipped()
             .animation(animation, value: shown)
-            .onAppear { self.frameSize = frameSize(for: shown) }
+            .onAppear { self.frameValue = frameValue(for: shown) }
             .onChange(of: shown, perform: handleAppearanceForFrame)
     }
 
     private func handleAppearanceForFrame(shown: Bool) {
         withAnimation(animation) {
-            self.frameSize = frameSize(for: shown)
+            self.frameValue = frameValue(for: shown)
         }
     }
 
-    private func frameSize(for shown: Bool) -> CGSize? {
+    private func frameValue(for shown: Bool) -> CGFloat? {
         switch shown {
-            case true: .none
-            case false: .zero
+            case true: return .none
+            case false: switch mode {
+                case let .vertical(minHeight): return minHeight
+                case let .horizontal(minWidth): return minWidth
+            }
         }
     }
 }
@@ -82,13 +85,13 @@ extension ScaleAppearanceModifier {
     private var frameWidth: CGFloat? {
         switch mode {
             case .vertical: .none
-            case .horizontal: frameSize?.width
+            case .horizontal: frameValue
         }
     }
 
     private var frameHeight: CGFloat? {
         switch mode {
-            case .vertical: frameSize?.height
+            case .vertical: frameValue
             case .horizontal: .none
         }
     }
