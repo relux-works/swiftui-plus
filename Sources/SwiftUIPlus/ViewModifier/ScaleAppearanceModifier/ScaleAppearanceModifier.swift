@@ -5,7 +5,7 @@ public extension View {
         shown: Binding<Bool>,
         animation: Animation = .easeInOut,
         anchor: Alignment = .center,
-        mode: ScaleAppearanceModifier.Mode = .vertical()
+        mode: ScaleAppearanceModifier.Mode = .vertical
     ) -> some View {
         self
             .modifier(
@@ -23,6 +23,14 @@ extension ScaleAppearanceModifier {
     public enum Mode {
         case vertical(minHeight: CGFloat = 0)
         case horizontal(minWidth: CGFloat = 0)
+
+        public static var vertical: Self {
+            .vertical(minHeight: 0)
+        }
+
+        public static var horizontal: Self {
+            .horizontal(minWidth: 0)
+        }
     }
 }
 
