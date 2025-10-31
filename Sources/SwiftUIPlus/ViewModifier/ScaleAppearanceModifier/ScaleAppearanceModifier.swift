@@ -5,7 +5,7 @@ public extension View {
         shown: Binding<Bool>,
         animation: Animation = .easeInOut,
         anchor: Alignment = .center,
-        mode: ScaleAppearanceModifier.Mode = .vertical
+        mode: ScaleAppearanceModifier.Mode = .vertical()
     ) -> some View {
         self
             .modifier(
@@ -21,7 +21,7 @@ public extension View {
 
 extension ScaleAppearanceModifier {
     public enum Mode {
-        case vertical
+        case vertical(minHeight: CGFloat = 0)
         case horizontal(minWidth: CGFloat = 0)
     }
 }
@@ -60,7 +60,7 @@ public struct ScaleAppearanceModifier: ViewModifier {
         switch shown {
             case true: return .none
             case false: switch mode {
-                case .vertical: return .zero
+                case let .vertical(minHeight): return minHeight
                 case let .horizontal(minWidth): return minWidth
             }
         }
