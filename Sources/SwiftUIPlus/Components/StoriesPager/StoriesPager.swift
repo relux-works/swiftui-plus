@@ -135,7 +135,7 @@ public struct StoriesPager<Model, Page, SwitchModifier>: View
             scrollviewPager
                 .onAppear {
                     ls.delayForAnimation()
-                    Task.delayed(byTimeInterval: 0.1) { @MainActor in
+                    Task { @MainActor in
                         print(">>> stories: appear scroll to \(currentId)")
                         sr.scrollTo(currentId)
                     }
